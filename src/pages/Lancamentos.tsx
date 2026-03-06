@@ -31,9 +31,10 @@ const Lancamentos = () => {
       const today = new Date();
       const day = (navState.month === today.getMonth() && navState.year === today.getFullYear()) ? today.getDate() : 1;
       const safeDay = Math.min(day, new Date(navState.year, navState.month + 1, 0).getDate());
-      return new Date(navState.year, navState.month, safeDay).toISOString().split("T")[0];
+      return formatLocalDate(navState.year, navState.month, safeDay);
     }
-    return new Date().toISOString().split("T")[0];
+    const today = new Date();
+    return formatLocalDate(today.getFullYear(), today.getMonth(), today.getDate());
   });
   const [paymentMethod, setPaymentMethod] = useState("");
 
