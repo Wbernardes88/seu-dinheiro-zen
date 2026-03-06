@@ -11,6 +11,10 @@ import { Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
+const formatLocalDate = (y: number, m: number, d: number) => {
+  return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+};
+
 const Lancamentos = () => {
   const { transactions, addTransaction, deleteTransaction, categories } = useFinance();
   const location = useLocation();
