@@ -1,7 +1,10 @@
-import { challenge52Weeks, formatCurrency } from "@/lib/data";
+import { useFinance } from "@/contexts/FinanceContext";
+import { formatCurrency } from "@/lib/data";
 import { CheckCircle2, Circle } from "lucide-react";
 
 const Desafio52Semanas = () => {
+  const { challenge52Weeks, toggleWeek } = useFinance();
+
   const totalSaved = challenge52Weeks.filter((w) => w.completed).reduce((s, w) => s + w.amount, 0);
   const totalGoal = challenge52Weeks.reduce((s, w) => s + w.amount, 0);
   const pct = (totalSaved / totalGoal) * 100;
@@ -10,10 +13,9 @@ const Desafio52Semanas = () => {
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Desafio 52 Semanas</h1>
-        <p className="text-sm text-muted-foreground">Guarde um pouquinho a cada semana e veja o resultado!</p>
+        <p className="text-sm text-muted-foreground">Toque em uma semana para marcar/desmarcar</p>
       </div>
 
-      {/* Progress summary */}
       <div className="card-glass p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-foreground">Progresso geral</span>
@@ -28,17 +30,15 @@ const Desafio52Semanas = () => {
         </div>
       </div>
 
-      {/* Weeks grid */}
       <div className="card-glass p-4">
         <h3 className="text-sm font-semibold text-foreground mb-3">Semanas</h3>
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
           {challenge52Weeks.map((w) => (
-            <div
+            <button
               key={w.week}
-              className={`flex flex-col items-center p-2 rounded-lg text-xs transition-colors ${
-                w.completed
-                  ? "bg-accent text-accent-foreground"
-                  : "bg-secondary/50 text-muted-foreground"
+              onClick={() => toggleWeek(w.week)}
+              className={`flex flex-col items-center p-2 rounded-lg text-xs transition-colors cursor-pointer ${
+                w.completed ? "bg-accent text-accent-foreground" : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
               }`}
             >
               {w.completed ? (
@@ -48,7 +48,7 @@ const Desafio52Semanas = () => {
               )}
               <span className="font-medium">S{w.week}</span>
               <span className="text-[10px]">{formatCurrency(w.amount)}</span>
-            </div>
+            </button>
           ))}
         </div>
       </div>

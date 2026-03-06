@@ -30,6 +30,7 @@ export type SavingsGoal = {
   target: number;
   current: number;
   icon: string;
+  deadline?: string;
 };
 
 export const incomeCategories: Category[] = [
