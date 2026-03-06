@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { formatCurrency, paymentMethods } from "@/lib/data";
+import { formatCurrency, paymentMethods, parseLocalDate } from "@/lib/data";
 import { toast } from "sonner";
 import { Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -48,7 +48,7 @@ const Lancamentos = () => {
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => {
-      const d = new Date(t.date);
+      const d = parseLocalDate(t.date);
       if (d.getMonth() !== filterMonth || d.getFullYear() !== filterYear) return false;
       if (filterType !== "all" && t.type !== filterType) return false;
       if (filterCategory !== "all" && t.category !== filterCategory) return false;

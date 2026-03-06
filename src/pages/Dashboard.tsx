@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Plus, TrendingUp, TrendingDown, Wallet, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFinance } from "@/contexts/FinanceContext";
-import { formatCurrency } from "@/lib/data";
+import { formatCurrency, parseLocalDate } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 
@@ -23,7 +23,7 @@ const Dashboard = () => {
 
   const filtered = useMemo(() => {
     return transactions.filter((t) => {
-      const d = new Date(t.date);
+      const d = parseLocalDate(t.date);
       return d.getMonth() === month && d.getFullYear() === year;
     });
   }, [transactions, month, year]);
@@ -36,7 +36,7 @@ const Dashboard = () => {
   const monthlyBarData = useMemo(() => {
     const map = new Map<string, { income: number; expense: number; sort: number }>();
     transactions.forEach((t) => {
-      const d = new Date(t.date);
+      const d = parseLocalDate(t.date);
       const m = d.getMonth();
       const y = d.getFullYear();
       const key = `${y}-${m}`;

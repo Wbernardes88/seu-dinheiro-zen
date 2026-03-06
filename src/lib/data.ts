@@ -89,3 +89,8 @@ export const paymentMethods = ["Pix", "Cartão crédito", "Cartão débito", "Di
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
+
+export function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day, 12, 0, 0);
+}
