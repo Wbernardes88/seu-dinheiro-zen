@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
 import { useFinance } from "@/contexts/FinanceContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +11,6 @@ import { Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
 const Lancamentos = () => {
-  const [searchParams] = useSearchParams();
   const { transactions, addTransaction, deleteTransaction, categories } = useFinance();
 
   // Form state
@@ -23,12 +21,10 @@ const Lancamentos = () => {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [paymentMethod, setPaymentMethod] = useState("");
 
-  // Filter state - use URL params if provided, otherwise current date
+  // Filter state
   const now = new Date();
-  const initialMonth = searchParams.get("month") !== null ? parseInt(searchParams.get("month")!) : now.getMonth();
-  const initialYear = searchParams.get("year") !== null ? parseInt(searchParams.get("year")!) : now.getFullYear();
-  const [filterMonth, setFilterMonth] = useState(initialMonth);
-  const [filterYear, setFilterYear] = useState(initialYear);
+  const [filterMonth, setFilterMonth] = useState(now.getMonth());
+  const [filterYear, setFilterYear] = useState(now.getFullYear());
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
   const [filterCategory, setFilterCategory] = useState("all");
 

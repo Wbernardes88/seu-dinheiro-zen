@@ -70,7 +70,7 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold text-foreground">Olá! 👋</h1>
           <p className="text-sm text-muted-foreground">{months[now.getMonth()]} de {now.getFullYear()}</p>
         </div>
-        <Button size="sm" onClick={() => navigate(`/lancamentos?month=${month}&year=${year}`)} className="gap-1.5">
+        <Button size="sm" onClick={() => navigate("/lancamentos")} className="gap-1.5">
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">Lançamento</span>
         </Button>
