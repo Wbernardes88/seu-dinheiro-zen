@@ -1,13 +1,23 @@
+import { useState } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
 import { formatCurrency } from "@/lib/data";
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle, Pencil } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const Desafio52Semanas = () => {
-  const { challenge52Weeks, toggleWeek } = useFinance();
+  const { challenge52Weeks, toggleWeek, challenge52Goal, setChallenge52Goal } = useFinance();
+  const [editing, setEditing] = useState(false);
+  const [goalInput, setGoalInput] = useState(String(challenge52Goal));
 
   const totalSaved = challenge52Weeks.filter((w) => w.completed).reduce((s, w) => s + w.amount, 0);
-  const totalGoal = challenge52Weeks.reduce((s, w) => s + w.amount, 0);
-  const pct = (totalSaved / totalGoal) * 100;
+  const pct = Math.min((totalSaved / challenge52Goal) * 100, 100);
+
+  const handleSaveGoal = () => {
+    const val = parseFloat(goalInput.replace(/[^\d.,]/g, "").replace(",", "."));
+    if (val > 0) setChallenge52Goal(val);
+    setEditing(false);
+  };
 
   return (
     <div className="space-y-5">
@@ -24,9 +34,33 @@ const Desafio52Semanas = () => {
         <div className="w-full bg-secondary rounded-full h-3">
           <div className="bg-primary h-3 rounded-full transition-all" style={{ width: `${pct}%` }} />
         </div>
-        <div className="flex justify-between text-xs text-muted-foreground mt-2">
+        <div className="flex justify-between items-center text-xs text-muted-foreground mt-2">
           <span>Guardado: {formatCurrency(totalSaved)}</span>
-          <span>Meta: {formatCurrency(totalGoal)}</span>
+          <div className="flex items-center gap-1.5">
+            {editing ? (
+              <div className="flex items-center gap-1.5">
+                <span>Meta:</span>
+                <Input
+                  className="h-7 w-28 text-xs"
+                  value={goalInput}
+                  onChange={(e) => setGoalInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSaveGoal()}
+                  autoFocus
+                />
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={handleSaveGoal}>
+                  OK
+                </Button>
+              </div>
+            ) : (
+              <button
+                onClick={() => { setGoalInput(String(challenge52Goal)); setEditing(true); }}
+                className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
+              >
+                Meta: {formatCurrency(challenge52Goal)}
+                <Pencil className="h-3 w-3" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
