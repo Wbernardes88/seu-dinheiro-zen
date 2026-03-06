@@ -87,7 +87,7 @@ const Lancamentos = () => {
       ? today.getDate()
       : 1;
     const safeDay = Math.min(day, new Date(year, month + 1, 0).getDate());
-    setDate(new Date(year, month, safeDay).toISOString().split("T")[0]);
+    setDate(formatLocalDate(year, month, safeDay));
   };
 
   const prevMonth = () => {
