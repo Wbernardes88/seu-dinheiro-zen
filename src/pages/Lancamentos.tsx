@@ -46,8 +46,17 @@ const Lancamentos = () => {
       toast.error("Preencha todos os campos");
       return;
     }
+    // Validate date matches selected month/year; if not, adjust automatically
+    const selectedDate = new Date(date + "T12:00:00");
+    let finalDate = date;
+    if (selectedDate.getMonth() !== filterMonth || selectedDate.getFullYear() !== filterYear) {
+      // Keep the day but adjust to the filter month/year
+      const day = Math.min(selectedDate.getDate(), new Date(filterYear, filterMonth + 1, 0).getDate());
+      const adjusted = new Date(filterYear, filterMonth, day);
+      finalDate = adjusted.toISOString().split("T")[0];
+    }
     addTransaction({
-      date,
+      date: finalDate,
       type,
       category,
       description,
@@ -61,13 +70,28 @@ const Lancamentos = () => {
     toast.success("Lançamento adicionado!");
   };
 
+  const updateDateForMonth = (month: number, year: number) => {
+    const today = new Date();
+    const day = (month === today.getMonth() && year === today.getFullYear())
+      ? today.getDate()
+      : 1;
+    const safeDay = Math.min(day, new Date(year, month + 1, 0).getDate());
+    setDate(new Date(year, month, safeDay).toISOString().split("T")[0]);
+  };
+
   const prevMonth = () => {
-    if (filterMonth === 0) { setFilterMonth(11); setFilterYear((y) => y - 1); }
-    else setFilterMonth((m) => m - 1);
+    const newMonth = filterMonth === 0 ? 11 : filterMonth - 1;
+    const newYear = filterMonth === 0 ? filterYear - 1 : filterYear;
+    setFilterMonth(newMonth);
+    setFilterYear(newYear);
+    updateDateForMonth(newMonth, newYear);
   };
   const nextMonth = () => {
-    if (filterMonth === 11) { setFilterMonth(0); setFilterYear((y) => y + 1); }
-    else setFilterMonth((m) => m + 1);
+    const newMonth = filterMonth === 11 ? 0 : filterMonth + 1;
+    const newYear = filterMonth === 11 ? filterYear + 1 : filterYear;
+    setFilterMonth(newMonth);
+    setFilterYear(newYear);
+    updateDateForMonth(newMonth, newYear);
   };
 
   const uniqueCategories = [...new Set(transactions.map((t) => t.category))];
