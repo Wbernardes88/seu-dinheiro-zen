@@ -77,6 +77,9 @@ const LimiteGastos = () => {
                     <span className={`text-xs font-medium ${isOver ? "text-expense" : "text-muted-foreground"}`}>
                       {isOver ? "Estourado!" : `Restam ${formatCurrency(remaining)}`}
                     </span>
+                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${pct >= 100 ? "bg-expense/10 text-expense" : pct >= 75 ? "bg-yellow-500/10 text-yellow-600" : "bg-income/10 text-income"}`}>
+                      {Math.round(pct)}%
+                    </span>
                     <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100" onClick={() => openEdit(item)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
