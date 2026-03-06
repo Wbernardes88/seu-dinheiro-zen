@@ -1,13 +1,31 @@
+import { useState } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
 import { formatCurrency } from "@/lib/data";
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle, Pencil } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 const Desafio52Semanas = () => {
   const { challenge52Weeks, toggleWeek } = useFinance();
 
+  const defaultGoal = challenge52Weeks.reduce((s, w) => s + w.amount, 0);
+  const [customGoal, setCustomGoal] = useState<number | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState("");
+
+  const goal = customGoal ?? defaultGoal;
   const totalSaved = challenge52Weeks.filter((w) => w.completed).reduce((s, w) => s + w.amount, 0);
-  const totalGoal = challenge52Weeks.reduce((s, w) => s + w.amount, 0);
-  const pct = (totalSaved / totalGoal) * 100;
+  const pct = Math.min((totalSaved / goal) * 100, 100);
+
+  const handleEditStart = () => {
+    setEditValue(goal.toString());
+    setEditing(true);
+  };
+
+  const handleEditConfirm = () => {
+    const val = parseFloat(editValue);
+    if (!isNaN(val) && val > 0) setCustomGoal(val);
+    setEditing(false);
+  };
 
   return (
     <div className="space-y-5">
@@ -26,7 +44,26 @@ const Desafio52Semanas = () => {
         </div>
         <div className="flex justify-between text-xs text-muted-foreground mt-2">
           <span>Guardado: {formatCurrency(totalSaved)}</span>
-          <span>Meta: {formatCurrency(totalGoal)}</span>
+          <div className="flex items-center gap-1">
+            <span>Meta:</span>
+            {editing ? (
+              <form onSubmit={(e) => { e.preventDefault(); handleEditConfirm(); }} className="inline-flex items-center gap-1">
+                <Input
+                  type="number"
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onBlur={handleEditConfirm}
+                  autoFocus
+                  className="h-6 w-24 text-xs px-1"
+                />
+              </form>
+            ) : (
+              <button onClick={handleEditStart} className="inline-flex items-center gap-1 hover:text-primary transition-colors cursor-pointer">
+                <span className="font-semibold text-foreground">{formatCurrency(goal)}</span>
+                <Pencil className="h-3 w-3" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

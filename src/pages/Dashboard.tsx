@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useFinance } from "@/contexts/FinanceContext";
 import { formatCurrency } from "@/lib/data";
 import { Button } from "@/components/ui/button";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
@@ -32,10 +32,19 @@ const Dashboard = () => {
   const totalExpense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   const balance = totalIncome - totalExpense;
 
-  const barData = [
-    { name: "Entradas", value: totalIncome },
-    { name: "Saídas", value: totalExpense },
-  ];
+  const monthlyBarData = useMemo(() => {
+    const shortMonths = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+    const data: { name: string; entradas: number; saidas: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      let m = month - i;
+      let y = year;
+      while (m < 0) { m += 12; y--; }
+      const inc = transactions.filter(t => { const d = new Date(t.date); return t.type === "income" && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
+      const exp = transactions.filter(t => { const d = new Date(t.date); return t.type === "expense" && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
+      data.push({ name: shortMonths[m], entradas: inc, saidas: exp });
+    }
+    return data;
+  }, [transactions, month, year]);
 
   const expenseCategories = categories.filter((c) => c.type === "expense");
   const categorySpending = expenseCategories
@@ -57,7 +66,10 @@ const Dashboard = () => {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Olá! 👋</h1>
+          <p className="text-sm text-muted-foreground">{months[now.getMonth()]} de {now.getFullYear()}</p>
+        </div>
         <Button size="sm" onClick={() => navigate("/lancamentos")} className="gap-1.5">
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">Lançamento</span>
@@ -119,14 +131,12 @@ const Dashboard = () => {
         <div className="card-glass p-4">
           <h3 className="text-sm font-semibold text-foreground mb-3">Entradas vs Saídas</h3>
           <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={barData}>
+            <BarChart data={monthlyBarData}>
               <XAxis dataKey="name" axisLine={false} tickLine={false} fontSize={12} />
               <YAxis hide />
               <Tooltip formatter={(v: number) => formatCurrency(v)} />
-              <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                <Cell fill="hsl(152, 60%, 42%)" />
-                <Cell fill="hsl(0, 72%, 51%)" />
-              </Bar>
+              <Bar dataKey="entradas" name="Entradas" fill="hsl(152, 60%, 42%)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="saidas" name="Saídas" fill="hsl(0, 72%, 51%)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
