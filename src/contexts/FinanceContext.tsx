@@ -32,6 +32,8 @@ type FinanceContextType = {
   deleteSavingsGoal: (id: string) => void;
 
   challenge52Weeks: { week: number; amount: number; completed: boolean }[];
+  challenge52Goal: number;
+  setChallenge52Goal: (goal: number) => void;
   toggleWeek: (week: number) => void;
 };
 
@@ -52,6 +54,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [budgetLimits, setBudgetLimits] = useState<BudgetLimit[]>(defaultBudgetLimits);
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>(defaultSavingsGoals);
   const [weeks, setWeeks] = useState(defaultChallenge52Weeks);
+  const [challenge52Goal, setChallenge52Goal] = useState(() => defaultChallenge52Weeks.reduce((s, w) => s + w.amount, 0));
 
   const addTransaction = useCallback((t: Omit<Transaction, "id">) => {
     setTransactions((prev) => [{ ...t, id: Date.now().toString() }, ...prev]);
@@ -138,6 +141,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         updateSavingsGoal,
         deleteSavingsGoal,
         challenge52Weeks: weeks,
+        challenge52Goal,
+        setChallenge52Goal,
         toggleWeek,
       }}
     >
