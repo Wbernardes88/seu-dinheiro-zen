@@ -11,6 +11,10 @@ import { Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
+const formatLocalDate = (y: number, m: number, d: number) => {
+  return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+};
+
 const Lancamentos = () => {
   const { transactions, addTransaction, deleteTransaction, categories } = useFinance();
   const location = useLocation();
@@ -27,9 +31,10 @@ const Lancamentos = () => {
       const today = new Date();
       const day = (navState.month === today.getMonth() && navState.year === today.getFullYear()) ? today.getDate() : 1;
       const safeDay = Math.min(day, new Date(navState.year, navState.month + 1, 0).getDate());
-      return new Date(navState.year, navState.month, safeDay).toISOString().split("T")[0];
+      return formatLocalDate(navState.year, navState.month, safeDay);
     }
-    return new Date().toISOString().split("T")[0];
+    const today = new Date();
+    return formatLocalDate(today.getFullYear(), today.getMonth(), today.getDate());
   });
   const [paymentMethod, setPaymentMethod] = useState("");
 
@@ -57,15 +62,10 @@ const Lancamentos = () => {
       toast.error("Preencha todos os campos");
       return;
     }
-    // Validate date matches selected month/year; if not, adjust automatically
-    const selectedDate = new Date(date + "T12:00:00");
-    let finalDate = date;
-    if (selectedDate.getMonth() !== filterMonth || selectedDate.getFullYear() !== filterYear) {
-      // Keep the day but adjust to the filter month/year
-      const day = Math.min(selectedDate.getDate(), new Date(filterYear, filterMonth + 1, 0).getDate());
-      const adjusted = new Date(filterYear, filterMonth, day);
-      finalDate = adjusted.toISOString().split("T")[0];
-    }
+    // Force the date to belong to the active filterMonth/filterYear
+    const parsedDate = new Date(date + "T12:00:00");
+    const day = Math.min(parsedDate.getDate(), new Date(filterYear, filterMonth + 1, 0).getDate());
+    const finalDate = formatLocalDate(filterYear, filterMonth, day);
     addTransaction({
       date: finalDate,
       type,
@@ -87,7 +87,7 @@ const Lancamentos = () => {
       ? today.getDate()
       : 1;
     const safeDay = Math.min(day, new Date(year, month + 1, 0).getDate());
-    setDate(new Date(year, month, safeDay).toISOString().split("T")[0]);
+    setDate(formatLocalDate(year, month, safeDay));
   };
 
   const prevMonth = () => {
