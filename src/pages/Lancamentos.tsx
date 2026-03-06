@@ -13,6 +13,9 @@ const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","A
 
 const Lancamentos = () => {
   const { transactions, addTransaction, deleteTransaction, categories } = useFinance();
+  const location = useLocation();
+  const navState = location.state as { month?: number; year?: number } | null;
+  const now = new Date();
 
   // Form state
   const [type, setType] = useState<"income" | "expense">("expense");
@@ -20,21 +23,17 @@ const Lancamentos = () => {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(() => {
-    const loc = (location.state as { month?: number; year?: number } | null);
-    if (loc?.month != null && loc?.year != null) {
+    if (navState?.month != null && navState?.year != null) {
       const today = new Date();
-      const day = (loc.month === today.getMonth() && loc.year === today.getFullYear()) ? today.getDate() : 1;
-      const safeDay = Math.min(day, new Date(loc.year, loc.month + 1, 0).getDate());
-      return new Date(loc.year, loc.month, safeDay).toISOString().split("T")[0];
+      const day = (navState.month === today.getMonth() && navState.year === today.getFullYear()) ? today.getDate() : 1;
+      const safeDay = Math.min(day, new Date(navState.year, navState.month + 1, 0).getDate());
+      return new Date(navState.year, navState.month, safeDay).toISOString().split("T")[0];
     }
     return new Date().toISOString().split("T")[0];
   });
   const [paymentMethod, setPaymentMethod] = useState("");
 
-  // Filter state - use navigation state if coming from Dashboard
-  const location = useLocation();
-  const navState = location.state as { month?: number; year?: number } | null;
-  const now = new Date();
+  // Filter state
   const [filterMonth, setFilterMonth] = useState(navState?.month ?? now.getMonth());
   const [filterYear, setFilterYear] = useState(navState?.year ?? now.getFullYear());
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
