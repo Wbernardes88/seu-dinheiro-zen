@@ -3,7 +3,13 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import AppLayout from "./components/AppLayout";
+import Dashboard from "./pages/Dashboard";
+import Lancamentos from "./pages/Lancamentos";
+import Categorias from "./pages/Categorias";
+import LimiteGastos from "./pages/LimiteGastos";
+import Caixinha from "./pages/Caixinha";
+import Desafio52Semanas from "./pages/Desafio52Semanas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -15,8 +21,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/lancamentos" element={<Lancamentos />} />
+            <Route path="/categorias" element={<Categorias />} />
+            <Route path="/limites" element={<LimiteGastos />} />
+            <Route path="/caixinha" element={<Caixinha />} />
+            <Route path="/desafio" element={<Desafio52Semanas />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
