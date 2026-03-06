@@ -46,8 +46,17 @@ const Lancamentos = () => {
       toast.error("Preencha todos os campos");
       return;
     }
+    // Validate date matches selected month/year; if not, adjust automatically
+    const selectedDate = new Date(date + "T12:00:00");
+    let finalDate = date;
+    if (selectedDate.getMonth() !== filterMonth || selectedDate.getFullYear() !== filterYear) {
+      // Keep the day but adjust to the filter month/year
+      const day = Math.min(selectedDate.getDate(), new Date(filterYear, filterMonth + 1, 0).getDate());
+      const adjusted = new Date(filterYear, filterMonth, day);
+      finalDate = adjusted.toISOString().split("T")[0];
+    }
     addTransaction({
-      date,
+      date: finalDate,
       type,
       category,
       description,
