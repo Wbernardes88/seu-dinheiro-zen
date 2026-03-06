@@ -19,7 +19,16 @@ const Lancamentos = () => {
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(() => {
+    const loc = (location.state as { month?: number; year?: number } | null);
+    if (loc?.month != null && loc?.year != null) {
+      const today = new Date();
+      const day = (loc.month === today.getMonth() && loc.year === today.getFullYear()) ? today.getDate() : 1;
+      const safeDay = Math.min(day, new Date(loc.year, loc.month + 1, 0).getDate());
+      return new Date(loc.year, loc.month, safeDay).toISOString().split("T")[0];
+    }
+    return new Date().toISOString().split("T")[0];
+  });
   const [paymentMethod, setPaymentMethod] = useState("");
 
   // Filter state - use navigation state if coming from Dashboard
