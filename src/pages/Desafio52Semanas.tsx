@@ -13,7 +13,9 @@ const Desafio52Semanas = () => {
   const [editValue, setEditValue] = useState("");
 
   const goal = customGoal ?? defaultGoal;
-  const totalSaved = challenge52Weeks.filter((w) => w.completed).reduce((s, w) => s + w.amount, 0);
+  const scale = goal / defaultGoal;
+  const scaledWeeks = challenge52Weeks.map((w) => ({ ...w, amount: Math.round(w.amount * scale * 100) / 100 }));
+  const totalSaved = scaledWeeks.filter((w) => w.completed).reduce((s, w) => s + w.amount, 0);
   const pct = Math.min((totalSaved / goal) * 100, 100);
 
   const handleEditStart = () => {
@@ -70,7 +72,7 @@ const Desafio52Semanas = () => {
       <div className="card-glass p-4">
         <h3 className="text-sm font-semibold text-foreground mb-3">Semanas</h3>
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-          {challenge52Weeks.map((w) => (
+          {scaledWeeks.map((w) => (
             <button
               key={w.week}
               onClick={() => toggleWeek(w.week)}
