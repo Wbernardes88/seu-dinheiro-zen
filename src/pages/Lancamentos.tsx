@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import { useFinance } from "@/contexts/FinanceContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,19 +13,29 @@ const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","A
 
 const Lancamentos = () => {
   const { transactions, addTransaction, deleteTransaction, categories } = useFinance();
+  const location = useLocation();
+  const navState = location.state as { month?: number; year?: number } | null;
+  const now = new Date();
 
   // Form state
   const [type, setType] = useState<"income" | "expense">("expense");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(() => {
+    if (navState?.month != null && navState?.year != null) {
+      const today = new Date();
+      const day = (navState.month === today.getMonth() && navState.year === today.getFullYear()) ? today.getDate() : 1;
+      const safeDay = Math.min(day, new Date(navState.year, navState.month + 1, 0).getDate());
+      return new Date(navState.year, navState.month, safeDay).toISOString().split("T")[0];
+    }
+    return new Date().toISOString().split("T")[0];
+  });
   const [paymentMethod, setPaymentMethod] = useState("");
 
   // Filter state
-  const now = new Date();
-  const [filterMonth, setFilterMonth] = useState(now.getMonth());
-  const [filterYear, setFilterYear] = useState(now.getFullYear());
+  const [filterMonth, setFilterMonth] = useState(navState?.month ?? now.getMonth());
+  const [filterYear, setFilterYear] = useState(navState?.year ?? now.getFullYear());
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
   const [filterCategory, setFilterCategory] = useState("all");
 
