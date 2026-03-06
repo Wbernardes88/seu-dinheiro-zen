@@ -1,46 +1,30 @@
 import { useState, useMemo } from "react";
-import { useLocation } from "react-router-dom";
 import { useFinance } from "@/contexts/FinanceContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { formatCurrency, paymentMethods, parseLocalDate } from "@/lib/data";
+import { formatCurrency, paymentMethods } from "@/lib/data";
 import { toast } from "sonner";
 import { Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
-const formatLocalDate = (y: number, m: number, d: number) => {
-  return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-};
-
 const Lancamentos = () => {
   const { transactions, addTransaction, deleteTransaction, categories } = useFinance();
-  const location = useLocation();
-  const navState = location.state as { month?: number; year?: number } | null;
-  const now = new Date();
 
   // Form state
   const [type, setType] = useState<"income" | "expense">("expense");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(() => {
-    if (navState?.month != null && navState?.year != null) {
-      const today = new Date();
-      const day = (navState.month === today.getMonth() && navState.year === today.getFullYear()) ? today.getDate() : 1;
-      const safeDay = Math.min(day, new Date(navState.year, navState.month + 1, 0).getDate());
-      return formatLocalDate(navState.year, navState.month, safeDay);
-    }
-    const today = new Date();
-    return formatLocalDate(today.getFullYear(), today.getMonth(), today.getDate());
-  });
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [paymentMethod, setPaymentMethod] = useState("");
 
   // Filter state
-  const [filterMonth, setFilterMonth] = useState(navState?.month ?? now.getMonth());
-  const [filterYear, setFilterYear] = useState(navState?.year ?? now.getFullYear());
+  const now = new Date();
+  const [filterMonth, setFilterMonth] = useState(now.getMonth());
+  const [filterYear, setFilterYear] = useState(now.getFullYear());
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
   const [filterCategory, setFilterCategory] = useState("all");
 
@@ -48,7 +32,7 @@ const Lancamentos = () => {
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => {
-      const d = parseLocalDate(t.date);
+      const d = new Date(t.date);
       if (d.getMonth() !== filterMonth || d.getFullYear() !== filterYear) return false;
       if (filterType !== "all" && t.type !== filterType) return false;
       if (filterCategory !== "all" && t.category !== filterCategory) return false;
@@ -62,12 +46,8 @@ const Lancamentos = () => {
       toast.error("Preencha todos os campos");
       return;
     }
-    // Force the date to belong to the active filterMonth/filterYear
-    const parsedDate = new Date(date + "T12:00:00");
-    const day = Math.min(parsedDate.getDate(), new Date(filterYear, filterMonth + 1, 0).getDate());
-    const finalDate = formatLocalDate(filterYear, filterMonth, day);
     addTransaction({
-      date: finalDate,
+      date,
       type,
       category,
       description,
@@ -81,28 +61,13 @@ const Lancamentos = () => {
     toast.success("Lançamento adicionado!");
   };
 
-  const updateDateForMonth = (month: number, year: number) => {
-    const today = new Date();
-    const day = (month === today.getMonth() && year === today.getFullYear())
-      ? today.getDate()
-      : 1;
-    const safeDay = Math.min(day, new Date(year, month + 1, 0).getDate());
-    setDate(formatLocalDate(year, month, safeDay));
-  };
-
   const prevMonth = () => {
-    const newMonth = filterMonth === 0 ? 11 : filterMonth - 1;
-    const newYear = filterMonth === 0 ? filterYear - 1 : filterYear;
-    setFilterMonth(newMonth);
-    setFilterYear(newYear);
-    updateDateForMonth(newMonth, newYear);
+    if (filterMonth === 0) { setFilterMonth(11); setFilterYear((y) => y - 1); }
+    else setFilterMonth((m) => m - 1);
   };
   const nextMonth = () => {
-    const newMonth = filterMonth === 11 ? 0 : filterMonth + 1;
-    const newYear = filterMonth === 11 ? filterYear + 1 : filterYear;
-    setFilterMonth(newMonth);
-    setFilterYear(newYear);
-    updateDateForMonth(newMonth, newYear);
+    if (filterMonth === 11) { setFilterMonth(0); setFilterYear((y) => y + 1); }
+    else setFilterMonth((m) => m + 1);
   };
 
   const uniqueCategories = [...new Set(transactions.map((t) => t.category))];

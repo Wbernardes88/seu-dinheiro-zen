@@ -13,7 +13,6 @@ import Caixinha from "./pages/Caixinha";
 import Desafio52Semanas from "./pages/Desafio52Semanas";
 import NotFound from "./pages/NotFound";
 
-
 const queryClient = new QueryClient();
 
 const App = () => (

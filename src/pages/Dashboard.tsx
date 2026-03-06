@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Plus, TrendingUp, TrendingDown, Wallet, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFinance } from "@/contexts/FinanceContext";
-import { formatCurrency, parseLocalDate } from "@/lib/data";
+import { formatCurrency } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 
@@ -23,7 +23,7 @@ const Dashboard = () => {
 
   const filtered = useMemo(() => {
     return transactions.filter((t) => {
-      const d = parseLocalDate(t.date);
+      const d = new Date(t.date);
       return d.getMonth() === month && d.getFullYear() === year;
     });
   }, [transactions, month, year]);
@@ -32,28 +32,10 @@ const Dashboard = () => {
   const totalExpense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   const balance = totalIncome - totalExpense;
 
-  // Build comparative monthly bar data from all transactions
-  const monthlyBarData = useMemo(() => {
-    const map = new Map<string, { income: number; expense: number; sort: number }>();
-    transactions.forEach((t) => {
-      const d = parseLocalDate(t.date);
-      const m = d.getMonth();
-      const y = d.getFullYear();
-      const key = `${y}-${m}`;
-      if (!map.has(key)) map.set(key, { income: 0, expense: 0, sort: y * 12 + m });
-      const entry = map.get(key)!;
-      if (t.type === "income") entry.income += t.amount;
-      else entry.expense += t.amount;
-    });
-    const shortMonths = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-    return Array.from(map.entries())
-      .sort((a, b) => a[1].sort - b[1].sort)
-      .slice(-6)
-      .map(([key, val]) => {
-        const [y, m] = key.split("-").map(Number);
-        return { name: `${shortMonths[m]}/${String(y).slice(2)}`, income: val.income, expense: val.expense };
-      });
-  }, [transactions]);
+  const barData = [
+    { name: "Entradas", value: totalIncome },
+    { name: "Saídas", value: totalExpense },
+  ];
 
   const expenseCategories = categories.filter((c) => c.type === "expense");
   const categorySpending = expenseCategories
@@ -75,11 +57,8 @@ const Dashboard = () => {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Olá! 👋</h1>
-          <p className="text-sm text-muted-foreground">{months[month]} de {year}</p>
-        </div>
-        <Button size="sm" onClick={() => navigate("/lancamentos", { state: { month, year } })} className="gap-1.5">
+        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <Button size="sm" onClick={() => navigate("/lancamentos")} className="gap-1.5">
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">Lançamento</span>
         </Button>
@@ -140,12 +119,14 @@ const Dashboard = () => {
         <div className="card-glass p-4">
           <h3 className="text-sm font-semibold text-foreground mb-3">Entradas vs Saídas</h3>
           <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={monthlyBarData}>
-              <XAxis dataKey="name" axisLine={false} tickLine={false} fontSize={11} />
+            <BarChart data={barData}>
+              <XAxis dataKey="name" axisLine={false} tickLine={false} fontSize={12} />
               <YAxis hide />
               <Tooltip formatter={(v: number) => formatCurrency(v)} />
-              <Bar dataKey="income" name="Entradas" fill="hsl(152, 60%, 42%)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="expense" name="Saídas" fill="hsl(0, 72%, 51%)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                <Cell fill="hsl(152, 60%, 42%)" />
+                <Cell fill="hsl(0, 72%, 51%)" />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>

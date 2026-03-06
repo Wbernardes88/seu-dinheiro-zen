@@ -10,7 +10,6 @@ import {
   budgetLimits as defaultBudgetLimits,
   savingsGoals as defaultSavingsGoals,
   challenge52Weeks as defaultChallenge52Weeks,
-  parseLocalDate,
 } from "@/lib/data";
 
 type FinanceContextType = {
@@ -33,8 +32,6 @@ type FinanceContextType = {
   deleteSavingsGoal: (id: string) => void;
 
   challenge52Weeks: { week: number; amount: number; completed: boolean }[];
-  challenge52Goal: number;
-  setChallenge52Goal: (goal: number) => void;
   toggleWeek: (week: number) => void;
 };
 
@@ -55,7 +52,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [budgetLimits, setBudgetLimits] = useState<BudgetLimit[]>(defaultBudgetLimits);
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>(defaultSavingsGoals);
   const [weeks, setWeeks] = useState(defaultChallenge52Weeks);
-  const [challenge52Goal, setChallenge52Goal] = useState(() => defaultChallenge52Weeks.reduce((s, w) => s + w.amount, 0));
 
   const addTransaction = useCallback((t: Omit<Transaction, "id">) => {
     setTransactions((prev) => [{ ...t, id: Date.now().toString() }, ...prev]);
@@ -117,8 +113,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         (t) =>
           t.type === "expense" &&
           t.category === bl.category &&
-          parseLocalDate(t.date).getMonth() === now.getMonth() &&
-          parseLocalDate(t.date).getFullYear() === now.getFullYear()
+          new Date(t.date).getMonth() === now.getMonth() &&
+          new Date(t.date).getFullYear() === now.getFullYear()
       )
       .reduce((sum, t) => sum + t.amount, 0);
     return { ...bl, spent };
@@ -142,8 +138,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         updateSavingsGoal,
         deleteSavingsGoal,
         challenge52Weeks: weeks,
-        challenge52Goal,
-        setChallenge52Goal,
         toggleWeek,
       }}
     >
