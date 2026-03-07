@@ -66,19 +66,36 @@ const LimiteGastos = () => {
       ) : (
         <div className="space-y-3">
           {budgetLimits.map((item) => {
-            const pct = item.budget > 0 ? Math.min((item.spent / item.budget) * 100, 100) : 0;
+            const rawPct = item.budget > 0 ? (item.spent / item.budget) * 100 : 0;
+            const clampedPct = Math.min(rawPct, 100);
             const remaining = item.budget - item.spent;
             const isOver = remaining < 0;
+            // Alert rules: ≤79% normal, 80-99% yellow, ≥100% red
+            const alertColor = rawPct >= 100
+              ? "text-expense"
+              : rawPct >= 80
+              ? "text-yellow-600 dark:text-yellow-500"
+              : "text-income";
+            const badgeBg = rawPct >= 100
+              ? "bg-expense/10 text-expense"
+              : rawPct >= 80
+              ? "bg-yellow-500/10 text-yellow-600 dark:text-yellow-500"
+              : "bg-income/10 text-income";
+            const borderAlert = rawPct >= 100
+              ? "border-expense/40"
+              : rawPct >= 80
+              ? "border-yellow-500/40"
+              : "";
             return (
-              <div key={item.categoryId} className="card-glass p-4 space-y-2.5 group">
+              <div key={item.categoryId} className={`card-glass p-4 space-y-2.5 group ${borderAlert}`}>
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-foreground">{item.category}</h3>
+                  <h3 className={`text-sm font-semibold ${rawPct >= 100 ? "text-expense" : "text-foreground"}`}>{item.category}</h3>
                   <div className="flex items-center gap-1">
-                    <span className={`text-xs font-medium ${isOver ? "text-expense" : "text-muted-foreground"}`}>
+                    <span className={`text-xs font-medium ${isOver ? "text-expense" : rawPct >= 80 ? alertColor : "text-muted-foreground"}`}>
                       {isOver ? "Estourado!" : `Restam ${formatCurrency(remaining)}`}
                     </span>
-                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${pct >= 100 ? "bg-expense/10 text-expense" : pct >= 75 ? "bg-yellow-500/10 text-yellow-600" : "bg-income/10 text-income"}`}>
-                      {Math.round(pct)}%
+                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${badgeBg}`}>
+                      {Math.round(rawPct)}%
                     </span>
                     <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100" onClick={() => openEdit(item)}>
                       <Pencil className="h-3.5 w-3.5" />
@@ -88,7 +105,7 @@ const LimiteGastos = () => {
                     </Button>
                   </div>
                 </div>
-                <Progress value={pct} className="h-2" />
+                <Progress value={clampedPct} className={`h-2 ${rawPct >= 100 ? "[&>div]:bg-expense" : rawPct >= 80 ? "[&>div]:bg-yellow-500" : ""}`} />
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Gasto: {formatCurrency(item.spent)}</span>
                   <span>Limite: {formatCurrency(item.budget)}</span>
