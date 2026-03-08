@@ -122,6 +122,34 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return { ...bl, spent };
   });
 
+  // Track previous percentages to only alert on changes
+  const prevPctRef = useRef<Record<string, number>>({});
+
+  useEffect(() => {
+    const prev = prevPctRef.current;
+    const newPct: Record<string, number> = {};
+
+    computedBudgetLimits.forEach((bl) => {
+      if (bl.budget <= 0) return;
+      const pct = (bl.spent / bl.budget) * 100;
+      newPct[bl.categoryId] = pct;
+      const prevVal = prev[bl.categoryId];
+
+      // Only alert when crossing a threshold (not on initial load)
+      if (prevVal === undefined) return;
+
+      if (pct >= 100 && prevVal < 100) {
+        toast.error(`🚨 ${bl.category}: Limite estourado! Você ultrapassou 100% do orçamento.`);
+      } else if (pct >= 80 && prevVal < 80) {
+        toast.warning(`⚠️ ${bl.category}: Atenção! Você já usou ${Math.round(pct)}% do limite. Hora de segurar os gastos!`);
+      } else if (pct > 0 && prevVal === 0) {
+        toast.info(`💡 ${bl.category}: Gastos iniciados. Você está em ${Math.round(pct)}% do limite — tudo sob controle!`);
+      }
+    });
+
+    prevPctRef.current = newPct;
+  }, [computedBudgetLimits]);
+
   return (
     <FinanceContext.Provider
       value={{
