@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
+import { parseLocalDate } from "@/lib/data";
 import {
   type Transaction,
   type Category,
@@ -113,8 +114,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         (t) =>
           t.type === "expense" &&
           t.category === bl.category &&
-          new Date(t.date).getMonth() === now.getMonth() &&
-          new Date(t.date).getFullYear() === now.getFullYear()
+           parseLocalDate(t.date).getMonth() === now.getMonth() &&
+           parseLocalDate(t.date).getFullYear() === now.getFullYear()
       )
       .reduce((sum, t) => sum + t.amount, 0);
     return { ...bl, spent };

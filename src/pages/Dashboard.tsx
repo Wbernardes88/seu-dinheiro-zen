@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Plus, TrendingUp, TrendingDown, Wallet, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFinance } from "@/contexts/FinanceContext";
-import { formatCurrency } from "@/lib/data";
+import { formatCurrency, parseLocalDate } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
@@ -23,7 +23,7 @@ const Dashboard = () => {
 
   const filtered = useMemo(() => {
     return transactions.filter((t) => {
-      const d = new Date(t.date);
+      const d = parseLocalDate(t.date);
       return d.getMonth() === month && d.getFullYear() === year;
     });
   }, [transactions, month, year]);
@@ -39,8 +39,8 @@ const Dashboard = () => {
       let m = month - i;
       let y = year;
       while (m < 0) { m += 12; y--; }
-      const inc = transactions.filter(t => { const d = new Date(t.date); return t.type === "income" && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
-      const exp = transactions.filter(t => { const d = new Date(t.date); return t.type === "expense" && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
+      const inc = transactions.filter(t => { const d = parseLocalDate(t.date); return t.type === "income" && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
+      const exp = transactions.filter(t => { const d = parseLocalDate(t.date); return t.type === "expense" && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
       data.push({ name: shortMonths[m], entradas: inc, saidas: exp });
     }
     return data;
