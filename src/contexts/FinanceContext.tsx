@@ -139,11 +139,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (prevVal === undefined) return;
 
       if (pct >= 100 && prevVal < 100) {
-        toast.error(`🚨 ${bl.category}: Limite estourado! Você ultrapassou 100% do orçamento.`);
+        toast.error(`🚨 ${bl.category}: Limite estourado! Você ultrapassou 100% do orçamento.`, { duration: Infinity });
       } else if (pct >= 80 && prevVal < 80) {
-        toast.warning(`⚠️ ${bl.category}: Atenção! Você já usou ${Math.round(pct)}% do limite. Hora de segurar os gastos!`);
+        toast.warning(`⚠️ ${bl.category}: Atenção! Você já usou ${Math.round(pct)}% do limite. Hora de segurar os gastos!`, { duration: Infinity });
       } else if (pct > 0 && prevVal === 0) {
-        toast.info(`💡 ${bl.category}: Gastos iniciados. Você está em ${Math.round(pct)}% do limite — tudo sob controle!`);
+        toast.info(`💡 ${bl.category}: Gastos iniciados. Você está em ${Math.round(pct)}% do limite — tudo sob controle!`, { duration: Infinity });
       }
     });
 
