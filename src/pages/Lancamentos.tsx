@@ -55,12 +55,14 @@ const Lancamentos = () => {
       description,
       paymentMethod,
       amount: parseFloat(amount),
+      isRecurring,
     });
     setDescription("");
     setAmount("");
     setCategory("");
     setPaymentMethod("");
-    toast.success("Lançamento adicionado!");
+    setIsRecurring(false);
+    toast.success(isRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!");
   };
 
   const prevMonth = () => {
