@@ -151,7 +151,9 @@ const Lancamentos = () => {
           <Switch id="recurring-toggle" checked={isRecurring} onCheckedChange={setIsRecurring} />
         </div>
 
-        <Button type="submit" className="w-full">Adicionar lançamento</Button>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Adicionando..." : "Adicionar lançamento"}
+        </Button>
       </form>
 
       {/* Filters */}

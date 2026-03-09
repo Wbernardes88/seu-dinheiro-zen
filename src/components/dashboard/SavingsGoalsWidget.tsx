@@ -36,6 +36,8 @@ const SavingsGoalsWidget = React.forwardRef<HTMLDivElement>((_, ref) => {
       </div>
     </div>
   );
-};
+});
+
+SavingsGoalsWidget.displayName = "SavingsGoalsWidget";
 
 export default SavingsGoalsWidget;
