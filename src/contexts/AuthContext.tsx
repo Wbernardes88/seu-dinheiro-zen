@@ -25,7 +25,7 @@ export const useAuth = () => {
 };
 
 const autoCreateCouple = async (userId: string): Promise<string | null> => {
-  const { data, error } = await supabase.rpc("auto_create_couple", { p_user_id: userId });
+  const { data, error } = await supabase.rpc("auto_create_couple" as any, { p_user_id: userId });
   if (error) {
     console.error("Auto-create couple error:", error);
     return null;
