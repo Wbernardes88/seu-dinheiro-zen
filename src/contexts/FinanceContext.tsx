@@ -37,6 +37,7 @@ type FinanceContextType = {
   toggleWeek: (week: number) => void;
 };
 
+
 const FinanceContext = createContext<FinanceContextType | null>(null);
 
 export const useFinance = () => {
