@@ -194,7 +194,10 @@ const Lancamentos = () => {
                     {t.type === "income" ? "↑" : "↓"}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{t.description}</p>
+                    <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
+                      {t.description}
+                      {t.isRecurring && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium shrink-0">🔄</span>}
+                    </p>
                     <p className="text-xs text-muted-foreground">{t.category} · {t.paymentMethod} · {t.date}</p>
                   </div>
                 </div>
