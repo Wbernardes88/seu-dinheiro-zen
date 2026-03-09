@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { incomeCategories, expenseCategories } from "@/lib/data";
+
 
 type AuthContextType = {
   user: User | null;
@@ -25,40 +25,12 @@ export const useAuth = () => {
 };
 
 const autoCreateCouple = async (userId: string): Promise<string | null> => {
-  // Create a personal couple space
-  const { data: couple, error: coupleErr } = await supabase
-    .from("couples")
-    .insert({ name: "Meu Espaço" })
-    .select()
-    .single();
-
-  if (coupleErr || !couple) return null;
-
-  const { error: memberErr } = await supabase
-    .from("couple_members")
-    .insert({ couple_id: couple.id, user_id: userId, role: "owner" });
-
-  if (memberErr) return null;
-
-  // Seed default categories
-  const allCats = [...incomeCategories, ...expenseCategories].map((c) => ({
-    couple_id: couple.id,
-    name: c.name,
-    icon: c.icon,
-    type: c.type,
-  }));
-  await supabase.from("categories").insert(allCats);
-
-  // Seed challenge 52 weeks
-  const weeks = Array.from({ length: 52 }, (_, i) => ({
-    couple_id: couple.id,
-    week: i + 1,
-    amount: (i + 1) * 5,
-    completed: false,
-  }));
-  await supabase.from("challenge_weeks").insert(weeks);
-
-  return couple.id;
+  const { data, error } = await supabase.rpc("auto_create_couple" as any, { p_user_id: userId });
+  if (error) {
+    console.error("Auto-create couple error:", error);
+    return null;
+  }
+  return data as string;
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
