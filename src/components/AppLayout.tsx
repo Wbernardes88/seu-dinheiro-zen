@@ -16,6 +16,7 @@ const navItems = [
 const AppLayout = () => {
   const { theme, toggleTheme } = useTheme();
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Usuário";
   const initials = displayName.slice(0, 2).toUpperCase();
