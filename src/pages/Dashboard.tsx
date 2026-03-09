@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, TrendingUp, TrendingDown, Wallet } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFinance } from "@/contexts/FinanceContext";
 import { formatCurrency, parseLocalDate } from "@/lib/data";
@@ -12,6 +12,8 @@ import BudgetAlerts from "@/components/dashboard/BudgetAlerts";
 import SavingsGoalsWidget from "@/components/dashboard/SavingsGoalsWidget";
 import ChallengeWidget from "@/components/dashboard/ChallengeWidget";
 import BalanceEvolutionChart from "@/components/dashboard/BalanceEvolutionChart";
+import BalanceForecastCard from "@/components/dashboard/BalanceForecastCard";
+import FinancialHealthCard from "@/components/dashboard/FinancialHealthCard";
 
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const shortMonthLabels = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
@@ -42,6 +44,26 @@ const Dashboard = () => {
   const totalExpense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   const balance = totalIncome - totalExpense;
 
+  // Previous month data for comparison
+  const prevMonthData = useMemo(() => {
+    let pm = month - 1;
+    let py = year;
+    if (pm < 0) { pm = 11; py--; }
+    const prev = transactions.filter((t) => {
+      const d = parseLocalDate(t.date);
+      return d.getMonth() === pm && d.getFullYear() === py;
+    });
+    const inc = prev.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+    const exp = prev.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+    return { income: inc, expense: exp, balance: inc - exp, hasData: prev.length > 0 };
+  }, [transactions, month, year]);
+
+  const getComparison = (current: number, previous: number, hasData: boolean) => {
+    if (!hasData || previous === 0) return null;
+    const pct = Math.round(((current - previous) / Math.abs(previous)) * 100);
+    return pct;
+  };
+
   const monthlyBarData = useMemo(() => {
     const data: { name: string; entradas: number; saidas: number }[] = [];
     for (let i = 5; i >= 0; i--) {
@@ -69,6 +91,10 @@ const Dashboard = () => {
     const cat = categories.find((c) => c.name === categoryName);
     return cat?.icon || (categoryName === "income" ? "↑" : "↓");
   };
+
+  const balanceComparison = getComparison(balance, prevMonthData.balance, prevMonthData.hasData);
+  const incomeComparison = getComparison(totalIncome, prevMonthData.income, prevMonthData.hasData);
+  const expenseComparison = getComparison(totalExpense, prevMonthData.expense, prevMonthData.hasData);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -122,6 +148,7 @@ const Dashboard = () => {
           value={formatCurrency(balance)}
           colorClass="text-foreground"
           bgClass="bg-primary/10"
+          comparison={balanceComparison}
         />
         <SummaryCard
           icon={<TrendingUp className="h-6 w-6 text-income" />}
@@ -129,6 +156,7 @@ const Dashboard = () => {
           value={formatCurrency(totalIncome)}
           colorClass="text-income"
           bgClass="bg-income/10"
+          comparison={incomeComparison}
         />
         <SummaryCard
           icon={<TrendingDown className="h-6 w-6 text-expense" />}
@@ -136,7 +164,15 @@ const Dashboard = () => {
           value={formatCurrency(totalExpense)}
           colorClass="text-expense"
           bgClass="bg-expense/10"
+          comparison={expenseComparison}
+          invertComparison
         />
+      </div>
+
+      {/* Forecast & Health */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <BalanceForecastCard month={month} year={year} />
+        <FinancialHealthCard month={month} year={year} />
       </div>
 
       {/* Charts row */}
@@ -153,10 +189,12 @@ const Dashboard = () => {
                 contentStyle={{
                   borderRadius: "12px",
                   border: "1px solid hsl(var(--border))",
-                  background: "hsl(var(--card))",
-                  color: "hsl(var(--foreground))",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                  background: "hsl(var(--popover))",
+                  color: "hsl(var(--popover-foreground))",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                 }}
+                labelStyle={{ color: "hsl(var(--popover-foreground))" }}
+                itemStyle={{ color: "hsl(var(--popover-foreground))" }}
               />
               <Bar dataKey="entradas" name="Entradas" fill="hsl(var(--income))" radius={[6, 6, 0, 0]} animationDuration={800} />
               <Bar dataKey="saidas" name="Saídas" fill="hsl(var(--expense))" radius={[6, 6, 0, 0]} animationDuration={800} />
@@ -203,10 +241,12 @@ const Dashboard = () => {
                     contentStyle={{
                       borderRadius: "12px",
                       border: "1px solid hsl(var(--border))",
-                      background: "hsl(var(--card))",
-                      color: "hsl(var(--foreground))",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      background: "hsl(var(--popover))",
+                      color: "hsl(var(--popover-foreground))",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                     }}
+                    labelStyle={{ color: "hsl(var(--popover-foreground))" }}
+                    itemStyle={{ color: "hsl(var(--popover-foreground))" }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -250,7 +290,12 @@ const Dashboard = () => {
                     {getCategoryIcon(t.category)}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground">{t.description}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-foreground">{t.description}</p>
+                      {(t as any).isRecurring && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">🔄 Recorrente</span>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">{t.category} · {t.date}</p>
                   </div>
                 </div>
@@ -267,25 +312,39 @@ const Dashboard = () => {
 };
 
 const SummaryCard = ({
-  icon, label, value, colorClass, bgClass,
+  icon, label, value, colorClass, bgClass, comparison, invertComparison,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   colorClass: string;
   bgClass: string;
-}) => (
-  <div className="bg-card rounded-2xl border shadow-sm p-5 transition-all hover:shadow-md hover:-translate-y-0.5 duration-200 animate-fade-in">
-    <div className="flex items-center gap-4">
-      <div className={`h-12 w-12 rounded-xl ${bgClass} flex items-center justify-center shrink-0`}>
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{label}</p>
-        <p className={`text-xl font-bold ${colorClass} truncate`}>{value}</p>
+  comparison?: number | null;
+  invertComparison?: boolean;
+}) => {
+  const isPositive = invertComparison ? (comparison ?? 0) <= 0 : (comparison ?? 0) >= 0;
+
+  return (
+    <div className="bg-card rounded-2xl border shadow-sm p-5 transition-all hover:shadow-md hover:-translate-y-0.5 duration-200 animate-fade-in">
+      <div className="flex items-center gap-4">
+        <div className={`h-12 w-12 rounded-xl ${bgClass} flex items-center justify-center shrink-0`}>
+          {icon}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{label}</p>
+          <p className={`text-xl font-bold ${colorClass} truncate`}>{value}</p>
+          {comparison != null && (
+            <div className={`flex items-center gap-1 mt-0.5 ${isPositive ? "text-income" : "text-expense"}`}>
+              {isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+              <span className="text-[11px] font-medium">
+                {comparison > 0 ? "+" : ""}{comparison}% vs mês anterior
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default Dashboard;
