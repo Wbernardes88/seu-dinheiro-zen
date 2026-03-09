@@ -14,13 +14,336 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      budget_limits: {
+        Row: {
+          budget: number
+          category: string
+          category_id: string | null
+          couple_id: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          budget: number
+          category: string
+          category_id?: string | null
+          couple_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          budget?: number
+          category?: string
+          category_id?: string | null
+          couple_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_limits_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_limits_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          couple_id: string
+          created_at: string
+          icon: string
+          id: string
+          name: string
+          type: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          icon?: string
+          id?: string
+          name: string
+          type: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          name?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_weeks: {
+        Row: {
+          amount: number
+          completed: boolean
+          completed_at: string | null
+          couple_id: string
+          id: string
+          week: number
+        }
+        Insert: {
+          amount: number
+          completed?: boolean
+          completed_at?: string | null
+          couple_id: string
+          id?: string
+          week: number
+        }
+        Update: {
+          amount?: number
+          completed?: boolean
+          completed_at?: string | null
+          couple_id?: string
+          id?: string
+          week?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_weeks_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      couple_invites: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          invite_code: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          expires_at?: string
+          id?: string
+          invite_code?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          invite_code?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "couple_invites_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      couple_members: {
+        Row: {
+          couple_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          couple_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          couple_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "couple_members_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      couples: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      savings_goals: {
+        Row: {
+          couple_id: string
+          created_at: string
+          current: number
+          deadline: string | null
+          icon: string
+          id: string
+          name: string
+          target: number
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          current?: number
+          deadline?: string | null
+          icon?: string
+          id?: string
+          name: string
+          target: number
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          current?: number
+          deadline?: string | null
+          icon?: string
+          id?: string
+          name?: string
+          target?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_goals_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount: number
+          category: string
+          couple_id: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          is_recurring: boolean
+          payment_method: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          couple_id: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          is_recurring?: boolean
+          payment_method?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          couple_id?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          is_recurring?: boolean
+          payment_method?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_couple_id: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
