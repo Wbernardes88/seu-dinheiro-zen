@@ -34,11 +34,17 @@ const FinancialHealthCard = ({ month, year }: Props) => {
       balanceScore = Math.max(0, Math.min(30, ratio * 60));
     }
 
-    // Factor 2: Budget adherence (0-30 pts)
+    // Factor 2: Budget adherence (0-30 pts) — compute spent for the selected month, not current
     let budgetScore = 30;
     if (budgetLimits.length > 0) {
-      const overBudget = budgetLimits.filter((b) => b.budget > 0 && b.spent > b.budget).length;
-      const nearBudget = budgetLimits.filter((b) => b.budget > 0 && b.spent >= b.budget * 0.8 && b.spent <= b.budget).length;
+      const limitsForMonth = budgetLimits.map((bl) => {
+        const spent = filtered
+          .filter((t) => t.type === "expense" && t.category === bl.category)
+          .reduce((s, t) => s + t.amount, 0);
+        return { ...bl, spent };
+      });
+      const overBudget = limitsForMonth.filter((b) => b.budget > 0 && b.spent > b.budget).length;
+      const nearBudget = limitsForMonth.filter((b) => b.budget > 0 && b.spent >= b.budget * 0.8 && b.spent <= b.budget).length;
       budgetScore = Math.max(0, 30 - overBudget * 10 - nearBudget * 3);
     }
 

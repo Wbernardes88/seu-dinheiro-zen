@@ -1,9 +1,10 @@
+import React from "react";
 import { Trophy } from "lucide-react";
 import { useFinance } from "@/contexts/FinanceContext";
 import { formatCurrency } from "@/lib/data";
 import { Progress } from "@/components/ui/progress";
 
-const ChallengeWidget = () => {
+const ChallengeWidget = React.forwardRef<HTMLDivElement>((_, ref) => {
   const { challenge52Weeks } = useFinance();
 
   const totalTarget = challenge52Weeks.reduce((s, w) => s + w.amount, 0);
@@ -12,7 +13,7 @@ const ChallengeWidget = () => {
   const completedWeeks = challenge52Weeks.filter((w) => w.completed).length;
 
   return (
-    <div className="bg-card rounded-2xl border shadow-sm p-5 transition-shadow hover:shadow-md animate-fade-in">
+    <div ref={ref} className="bg-card rounded-2xl border shadow-sm p-5 transition-shadow hover:shadow-md animate-fade-in">
       <div className="flex items-center gap-2 mb-4">
         <Trophy className="h-4 w-4 text-chart-3" />
         <h3 className="text-sm font-semibold text-foreground">Desafio 52 Semanas</h3>
@@ -36,6 +37,8 @@ const ChallengeWidget = () => {
       </div>
     </div>
   );
-};
+});
+
+ChallengeWidget.displayName = "ChallengeWidget";
 
 export default ChallengeWidget;

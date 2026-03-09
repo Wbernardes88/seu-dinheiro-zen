@@ -32,8 +32,8 @@ const DailyBudgetCard = ({ month, year }: Props) => {
     const daysLeft = daysInMonth - now.getDate();
     const daily = daysLeft > 0 ? balance / daysLeft : balance;
 
-    // Today's spending
-    const todayStr = now.toISOString().slice(0, 10);
+    // Today's spending (using local date to avoid UTC shift)
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     const todaySpent = filtered
       .filter((t) => t.type === "expense" && t.date === todayStr)
       .reduce((s, t) => s + t.amount, 0);
