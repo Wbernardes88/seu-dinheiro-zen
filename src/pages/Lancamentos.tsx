@@ -11,6 +11,11 @@ import { Trash2, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
+const getLocalDateStr = () => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+};
+
 const Lancamentos = () => {
   const { transactions, addTransaction, deleteTransaction, categories } = useFinance();
 
@@ -19,7 +24,8 @@ const Lancamentos = () => {
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(getLocalDateStr());
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
 
@@ -44,10 +50,13 @@ const Lancamentos = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!category || !description || !amount || !paymentMethod) {
       toast.error("Preencha todos os campos");
       return;
     }
+    setIsSubmitting(true);
+    const wasRecurring = isRecurring;
     addTransaction({
       date,
       type,
@@ -62,7 +71,8 @@ const Lancamentos = () => {
     setCategory("");
     setPaymentMethod("");
     setIsRecurring(false);
-    toast.success(isRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!");
+    toast.success(wasRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!");
+    setTimeout(() => setIsSubmitting(false), 500);
   };
 
   const prevMonth = () => {
@@ -141,7 +151,9 @@ const Lancamentos = () => {
           <Switch id="recurring-toggle" checked={isRecurring} onCheckedChange={setIsRecurring} />
         </div>
 
-        <Button type="submit" className="w-full">Adicionar lançamento</Button>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Adicionando..." : "Adicionar lançamento"}
+        </Button>
       </form>
 
       {/* Filters */}
