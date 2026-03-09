@@ -102,7 +102,7 @@ const Dashboard = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Olá! 👋</h1>
+          <h1 className="text-2xl font-bold text-foreground">{getGreeting()}</h1>
           <p className="text-sm text-muted-foreground">{months[now.getMonth()]} de {now.getFullYear()}</p>
         </div>
         <Button size="sm" onClick={() => navigate("/lancamentos")} className="gap-1.5 shadow-md hover:shadow-lg transition-shadow">
