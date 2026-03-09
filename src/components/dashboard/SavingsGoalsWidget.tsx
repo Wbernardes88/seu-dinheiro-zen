@@ -10,7 +10,7 @@ const SavingsGoalsWidget = React.forwardRef<HTMLDivElement>((_, ref) => {
   if (savingsGoals.length === 0) return null;
 
   return (
-    <div className="bg-card rounded-2xl border shadow-sm p-5 transition-shadow hover:shadow-md animate-fade-in">
+    <div ref={ref} className="bg-card rounded-2xl border shadow-sm p-5 transition-shadow hover:shadow-md animate-fade-in">
       <div className="flex items-center gap-2 mb-4">
         <Target className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold text-foreground">Metas (Caixinha)</h3>
