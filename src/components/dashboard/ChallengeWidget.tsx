@@ -37,6 +37,8 @@ const ChallengeWidget = React.forwardRef<HTMLDivElement>((_, ref) => {
       </div>
     </div>
   );
-};
+});
+
+ChallengeWidget.displayName = "ChallengeWidget";
 
 export default ChallengeWidget;
