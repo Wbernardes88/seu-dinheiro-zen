@@ -27,12 +27,12 @@ const pieColors = [
 
 const yearOptions = Array.from({ length: 5 }, (_, i) => 2024 + i);
 
-const getGreeting = () => {
+function getGreeting(): string {
   const h = new Date().getHours();
   if (h >= 5 && h < 12) return "Bom dia ☀️";
   if (h >= 12 && h < 18) return "Boa tarde 🌤";
   return "Boa noite 🌙";
-};
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
