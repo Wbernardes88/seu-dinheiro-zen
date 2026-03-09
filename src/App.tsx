@@ -15,14 +15,14 @@ import Caixinha from "./pages/Caixinha";
 import Desafio52Semanas from "./pages/Desafio52Semanas";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
-import CoupleSetup from "./pages/CoupleSetup";
+import CoupleManage from "./pages/CoupleManage";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, coupleId, coupleLoading } = useAuth();
+  const { user, loading, coupleLoading } = useAuth();
 
   if (loading || coupleLoading) {
     return (
@@ -33,7 +33,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!user) return <Navigate to="/auth" replace />;
-  if (!coupleId) return <CoupleSetup />;
 
   return <>{children}</>;
 };
@@ -64,6 +63,7 @@ const App = () => (
                 <Route path="/limites" element={<LimiteGastos />} />
                 <Route path="/caixinha" element={<Caixinha />} />
                 <Route path="/desafio" element={<Desafio52Semanas />} />
+                <Route path="/casal" element={<CoupleManage />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

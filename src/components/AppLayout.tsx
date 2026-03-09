@@ -1,5 +1,5 @@
-import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon, LogOut } from "lucide-react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon, LogOut, Users } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ const navItems = [
 const AppLayout = () => {
   const { theme, toggleTheme } = useTheme();
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Usuário";
   const initials = displayName.slice(0, 2).toUpperCase();
@@ -60,13 +61,22 @@ const AppLayout = () => {
         ))}
 
         {/* User info + logout at bottom */}
-        <div className="mt-auto border-t pt-3 px-2 space-y-2">
-          <div className="flex items-center gap-2 px-1">
+        <div className="mt-auto border-t pt-3 px-2 space-y-1">
+          <div className="flex items-center gap-2 px-1 mb-2">
             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
               <span className="text-primary text-xs font-semibold">{initials}</span>
             </div>
             <span className="text-sm font-medium text-foreground truncate">{displayName}</span>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-muted-foreground"
+            onClick={() => navigate("/casal")}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            Convidar parceiro(a)
+          </Button>
           <Button
             variant="ghost"
             size="sm"

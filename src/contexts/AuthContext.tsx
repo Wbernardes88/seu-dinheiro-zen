@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { incomeCategories, expenseCategories } from "@/lib/data";
 
 type AuthContextType = {
   user: User | null;
@@ -23,6 +24,43 @@ export const useAuth = () => {
   return ctx;
 };
 
+const autoCreateCouple = async (userId: string): Promise<string | null> => {
+  // Create a personal couple space
+  const { data: couple, error: coupleErr } = await supabase
+    .from("couples")
+    .insert({ name: "Meu Espaço" })
+    .select()
+    .single();
+
+  if (coupleErr || !couple) return null;
+
+  const { error: memberErr } = await supabase
+    .from("couple_members")
+    .insert({ couple_id: couple.id, user_id: userId, role: "owner" });
+
+  if (memberErr) return null;
+
+  // Seed default categories
+  const allCats = [...incomeCategories, ...expenseCategories].map((c) => ({
+    couple_id: couple.id,
+    name: c.name,
+    icon: c.icon,
+    type: c.type,
+  }));
+  await supabase.from("categories").insert(allCats);
+
+  // Seed challenge 52 weeks
+  const weeks = Array.from({ length: 52 }, (_, i) => ({
+    couple_id: couple.id,
+    week: i + 1,
+    amount: (i + 1) * 5,
+    completed: false,
+  }));
+  await supabase.from("challenge_weeks").insert(weeks);
+
+  return couple.id;
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -43,18 +81,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .select("couple_id")
       .eq("user_id", uid)
       .maybeSingle();
-    setCoupleId(data?.couple_id ?? null);
-    setCoupleLoading(false);
+
+    if (data?.couple_id) {
+      setCoupleId(data.couple_id);
+      setCoupleLoading(false);
+    } else {
+      // Auto-create a personal space
+      const newCoupleId = await autoCreateCouple(uid);
+      setCoupleId(newCoupleId);
+      setCoupleLoading(false);
+    }
   };
 
   useEffect(() => {
-    // Set up auth listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
       if (session?.user) {
-        // Defer couple fetch to avoid Supabase deadlocks
         setTimeout(() => fetchCoupleId(session.user.id), 0);
       } else {
         setCoupleId(null);
@@ -62,7 +106,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    // THEN check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
