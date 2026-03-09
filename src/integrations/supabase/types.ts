@@ -343,6 +343,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_create_couple: { Args: { p_user_id: string }; Returns: string }
       get_user_couple_id: { Args: never; Returns: string }
     }
     Enums: {
