@@ -50,10 +50,13 @@ const Lancamentos = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!category || !description || !amount || !paymentMethod) {
       toast.error("Preencha todos os campos");
       return;
     }
+    setIsSubmitting(true);
+    const wasRecurring = isRecurring;
     addTransaction({
       date,
       type,
@@ -68,7 +71,8 @@ const Lancamentos = () => {
     setCategory("");
     setPaymentMethod("");
     setIsRecurring(false);
-    toast.success(isRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!");
+    toast.success(wasRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!");
+    setTimeout(() => setIsSubmitting(false), 500);
   };
 
   const prevMonth = () => {
