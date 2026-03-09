@@ -1,18 +1,9 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
 import { parseLocalDate } from "@/lib/data";
-import {
-  type Transaction,
-  type Category,
-  type BudgetLimit,
-  type SavingsGoal,
-  mockTransactions,
-  incomeCategories as defaultIncomeCategories,
-  expenseCategories as defaultExpenseCategories,
-  budgetLimits as defaultBudgetLimits,
-  savingsGoals as defaultSavingsGoals,
-  challenge52Weeks as defaultChallenge52Weeks,
-} from "@/lib/data";
+import { useAuth } from "./AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import type { Transaction, Category, BudgetLimit, SavingsGoal } from "@/lib/data";
 
 type FinanceContextType = {
   transactions: Transaction[];
@@ -35,8 +26,9 @@ type FinanceContextType = {
 
   challenge52Weeks: { week: number; amount: number; completed: boolean }[];
   toggleWeek: (week: number) => void;
-};
 
+  loading: boolean;
+};
 
 const FinanceContext = createContext<FinanceContextType | null>(null);
 
@@ -47,91 +39,250 @@ export const useFinance = () => {
 };
 
 export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
-  const [categories, setCategories] = useState<Category[]>([
-    ...defaultIncomeCategories,
-    ...defaultExpenseCategories,
-  ]);
-  const [budgetLimits, setBudgetLimits] = useState<BudgetLimit[]>(defaultBudgetLimits);
-  const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>(defaultSavingsGoals);
-  const [weeks, setWeeks] = useState(defaultChallenge52Weeks);
+  const { user, coupleId } = useAuth();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [budgetLimitsRaw, setBudgetLimitsRaw] = useState<{ id: string; categoryId: string; category: string; budget: number }[]>([]);
+  const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([]);
+  const [weeks, setWeeks] = useState<{ week: number; amount: number; completed: boolean }[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const addTransaction = useCallback((t: Omit<Transaction, "id">) => {
-    let idCounter = 0;
-    const uniqueId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}-${idCounter++}`;
-    const newTransaction: Transaction = { ...t, id: uniqueId() };
+  // ---- FETCH ALL DATA ----
+  useEffect(() => {
+    if (!coupleId) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchAll = async () => {
+      setLoading(true);
+      const [txRes, catRes, blRes, sgRes, cwRes] = await Promise.all([
+        supabase.from("transactions").select("*").eq("couple_id", coupleId).order("date", { ascending: false }),
+        supabase.from("categories").select("*").eq("couple_id", coupleId),
+        supabase.from("budget_limits").select("*").eq("couple_id", coupleId),
+        supabase.from("savings_goals").select("*").eq("couple_id", coupleId),
+        supabase.from("challenge_weeks").select("*").eq("couple_id", coupleId).order("week"),
+      ]);
+
+      if (txRes.data) {
+        setTransactions(txRes.data.map((t) => ({
+          id: t.id,
+          date: t.date,
+          type: t.type as "income" | "expense",
+          category: t.category,
+          description: t.description,
+          paymentMethod: t.payment_method,
+          amount: Number(t.amount),
+          isRecurring: t.is_recurring,
+        })));
+      }
+
+      if (catRes.data) {
+        setCategories(catRes.data.map((c) => ({
+          id: c.id,
+          name: c.name,
+          icon: c.icon,
+          type: c.type as "income" | "expense",
+        })));
+      }
+
+      if (blRes.data) {
+        setBudgetLimitsRaw(blRes.data.map((b) => ({
+          id: b.id,
+          categoryId: b.category_id || b.id,
+          category: b.category,
+          budget: Number(b.budget),
+        })));
+      }
+
+      if (sgRes.data) {
+        setSavingsGoals(sgRes.data.map((g) => ({
+          id: g.id,
+          name: g.name,
+          target: Number(g.target),
+          current: Number(g.current),
+          icon: g.icon,
+          deadline: g.deadline || undefined,
+        })));
+      }
+
+      if (cwRes.data) {
+        setWeeks(cwRes.data.map((w) => ({
+          week: w.week,
+          amount: Number(w.amount),
+          completed: w.completed,
+        })));
+      }
+
+      setLoading(false);
+    };
+
+    fetchAll();
+
+    // Real-time subscriptions
+    const channel = supabase
+      .channel(`couple-${coupleId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "transactions", filter: `couple_id=eq.${coupleId}` }, () => {
+        supabase.from("transactions").select("*").eq("couple_id", coupleId).order("date", { ascending: false }).then(({ data }) => {
+          if (data) setTransactions(data.map((t) => ({
+            id: t.id, date: t.date, type: t.type as "income" | "expense", category: t.category,
+            description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount), isRecurring: t.is_recurring,
+          })));
+        });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "categories", filter: `couple_id=eq.${coupleId}` }, () => {
+        supabase.from("categories").select("*").eq("couple_id", coupleId).then(({ data }) => {
+          if (data) setCategories(data.map((c) => ({ id: c.id, name: c.name, icon: c.icon, type: c.type as "income" | "expense" })));
+        });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "budget_limits", filter: `couple_id=eq.${coupleId}` }, () => {
+        supabase.from("budget_limits").select("*").eq("couple_id", coupleId).then(({ data }) => {
+          if (data) setBudgetLimitsRaw(data.map((b) => ({ id: b.id, categoryId: b.category_id || b.id, category: b.category, budget: Number(b.budget) })));
+        });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "savings_goals", filter: `couple_id=eq.${coupleId}` }, () => {
+        supabase.from("savings_goals").select("*").eq("couple_id", coupleId).then(({ data }) => {
+          if (data) setSavingsGoals(data.map((g) => ({ id: g.id, name: g.name, target: Number(g.target), current: Number(g.current), icon: g.icon, deadline: g.deadline || undefined })));
+        });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "challenge_weeks", filter: `couple_id=eq.${coupleId}` }, () => {
+        supabase.from("challenge_weeks").select("*").eq("couple_id", coupleId).order("week").then(({ data }) => {
+          if (data) setWeeks(data.map((w) => ({ week: w.week, amount: Number(w.amount), completed: w.completed })));
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [coupleId]);
+
+  // ---- TRANSACTIONS ----
+  const addTransaction = useCallback(async (t: Omit<Transaction, "id">) => {
+    if (!coupleId || !user) return;
+
+    const insertOne = async (data: Omit<Transaction, "id">) => {
+      await supabase.from("transactions").insert({
+        couple_id: coupleId,
+        user_id: user.id,
+        date: data.date,
+        type: data.type,
+        category: data.category,
+        description: data.description,
+        payment_method: data.paymentMethod,
+        amount: data.amount,
+        is_recurring: data.isRecurring || false,
+      });
+    };
+
+    await insertOne(t);
 
     if (t.isRecurring) {
-      // Generate base + 11 recurring months in a single setState
       const baseDate = parseLocalDate(t.date);
-      const recurring: Transaction[] = [];
       for (let i = 1; i <= 11; i++) {
         const nextDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, Math.min(baseDate.getDate(), new Date(baseDate.getFullYear(), baseDate.getMonth() + i + 1, 0).getDate()));
         const dateStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, "0")}-${String(nextDate.getDate()).padStart(2, "0")}`;
-        recurring.push({
-          ...t,
-          id: uniqueId(),
-          date: dateStr,
-        });
+        await insertOne({ ...t, date: dateStr });
       }
-      setTransactions((prev) => [newTransaction, ...recurring, ...prev]);
-    } else {
-      setTransactions((prev) => [newTransaction, ...prev]);
     }
+  }, [coupleId, user]);
+
+  const deleteTransaction = useCallback(async (id: string) => {
+    await supabase.from("transactions").delete().eq("id", id);
   }, []);
 
-  const deleteTransaction = useCallback((id: string) => {
-    setTransactions((prev) => prev.filter((t) => t.id !== id));
-  }, []);
-
-  const addCategory = useCallback((c: Omit<Category, "id">) => {
-    setCategories((prev) => [...prev, { ...c, id: Date.now().toString() }]);
-  }, []);
-
-  const updateCategory = useCallback((id: string, c: Partial<Omit<Category, "id">>) => {
-    setCategories((prev) => prev.map((cat) => (cat.id === id ? { ...cat, ...c } : cat)));
-  }, []);
-
-  const deleteCategory = useCallback((id: string) => {
-    setCategories((prev) => prev.filter((cat) => cat.id !== id));
-  }, []);
-
-  const setBudgetLimit = useCallback((categoryId: string, category: string, budget: number) => {
-    setBudgetLimits((prev) => {
-      const exists = prev.find((b) => b.categoryId === categoryId);
-      if (exists) {
-        return prev.map((b) => (b.categoryId === categoryId ? { ...b, budget } : b));
-      }
-      return [...prev, { categoryId, category, budget, spent: 0 }];
+  // ---- CATEGORIES ----
+  const addCategory = useCallback(async (c: Omit<Category, "id">) => {
+    if (!coupleId) return;
+    await supabase.from("categories").insert({
+      couple_id: coupleId,
+      name: c.name,
+      icon: c.icon,
+      type: c.type,
     });
+  }, [coupleId]);
+
+  const updateCategory = useCallback(async (id: string, c: Partial<Omit<Category, "id">>) => {
+    await supabase.from("categories").update({
+      ...(c.name !== undefined && { name: c.name }),
+      ...(c.icon !== undefined && { icon: c.icon }),
+      ...(c.type !== undefined && { type: c.type }),
+    }).eq("id", id);
   }, []);
 
-  const deleteBudgetLimit = useCallback((categoryId: string) => {
-    setBudgetLimits((prev) => prev.filter((b) => b.categoryId !== categoryId));
+  const deleteCategory = useCallback(async (id: string) => {
+    await supabase.from("categories").delete().eq("id", id);
   }, []);
 
-  const addSavingsGoal = useCallback((g: Omit<SavingsGoal, "id">) => {
-    setSavingsGoals((prev) => [...prev, { ...g, id: Date.now().toString() }]);
+  // ---- BUDGET LIMITS ----
+  const setBudgetLimit = useCallback(async (categoryId: string, category: string, budget: number) => {
+    if (!coupleId) return;
+    const existing = budgetLimitsRaw.find((b) => b.categoryId === categoryId);
+    if (existing) {
+      await supabase.from("budget_limits").update({ budget }).eq("id", existing.id);
+    } else {
+      await supabase.from("budget_limits").insert({
+        couple_id: coupleId,
+        category_id: categoryId,
+        category,
+        budget,
+      });
+    }
+  }, [coupleId, budgetLimitsRaw]);
+
+  const deleteBudgetLimit = useCallback(async (categoryId: string) => {
+    const existing = budgetLimitsRaw.find((b) => b.categoryId === categoryId);
+    if (existing) {
+      await supabase.from("budget_limits").delete().eq("id", existing.id);
+    }
+  }, [budgetLimitsRaw]);
+
+  // ---- SAVINGS GOALS ----
+  const addSavingsGoal = useCallback(async (g: Omit<SavingsGoal, "id">) => {
+    if (!coupleId) return;
+    await supabase.from("savings_goals").insert({
+      couple_id: coupleId,
+      name: g.name,
+      target: g.target,
+      current: g.current,
+      icon: g.icon,
+      deadline: g.deadline || null,
+    });
+  }, [coupleId]);
+
+  const updateSavingsGoal = useCallback(async (id: string, g: Partial<Omit<SavingsGoal, "id">>) => {
+    await supabase.from("savings_goals").update({
+      ...(g.name !== undefined && { name: g.name }),
+      ...(g.target !== undefined && { target: g.target }),
+      ...(g.current !== undefined && { current: g.current }),
+      ...(g.icon !== undefined && { icon: g.icon }),
+      ...(g.deadline !== undefined && { deadline: g.deadline || null }),
+    }).eq("id", id);
   }, []);
 
-  const updateSavingsGoal = useCallback((id: string, g: Partial<Omit<SavingsGoal, "id">>) => {
-    setSavingsGoals((prev) => prev.map((goal) => (goal.id === id ? { ...goal, ...g } : goal)));
+  const deleteSavingsGoal = useCallback(async (id: string) => {
+    await supabase.from("savings_goals").delete().eq("id", id);
   }, []);
 
-  const deleteSavingsGoal = useCallback((id: string) => {
-    setSavingsGoals((prev) => prev.filter((g) => g.id !== id));
-  }, []);
-
-  const toggleWeek = useCallback((week: number) => {
-    setWeeks((prev) =>
-      prev.map((w) => (w.week === week ? { ...w, completed: !w.completed } : w))
-    );
-  }, []);
+  // ---- CHALLENGE 52 WEEKS ----
+  const toggleWeek = useCallback(async (week: number) => {
+    if (!coupleId) return;
+    const w = weeks.find((w) => w.week === week);
+    if (!w) return;
+    await supabase
+      .from("challenge_weeks")
+      .update({
+        completed: !w.completed,
+        completed_at: !w.completed ? new Date().toISOString() : null,
+      })
+      .eq("couple_id", coupleId)
+      .eq("week", week);
+  }, [coupleId, weeks]);
 
   // Compute spent per category from transactions for budget limits
   const computedBudgetLimits = useMemo(() => {
     const now = new Date();
-    return budgetLimits.map((bl) => {
+    return budgetLimitsRaw.map((bl) => {
       const spent = transactions
         .filter(
           (t) =>
@@ -143,7 +294,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .reduce((sum, t) => sum + t.amount, 0);
       return { ...bl, spent };
     });
-  }, [budgetLimits, transactions]);
+  }, [budgetLimitsRaw, transactions]);
 
   // Track previous percentages to only alert on changes
   const prevPctRef = useRef<Record<string, number>>({});
@@ -158,7 +309,6 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       newPct[bl.categoryId] = pct;
       const prevVal = prev[bl.categoryId];
 
-      // Only alert when crossing a threshold (not on initial load)
       if (prevVal === undefined) return;
 
       if (pct >= 100 && prevVal < 100) {
@@ -192,6 +342,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         deleteSavingsGoal,
         challenge52Weeks: weeks,
         toggleWeek,
+        loading,
       }}
     >
       {children}
