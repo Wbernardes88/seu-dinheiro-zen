@@ -1,5 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target } from "lucide-react";
+import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon } from "lucide-react";
+import { useTheme } from "./ThemeProvider";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Início" },
@@ -11,15 +13,28 @@ const navItems = [
 ];
 
 const AppLayout = () => {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-60 border-r bg-card p-4 gap-1 fixed h-full">
-        <div className="flex items-center gap-2 px-3 py-4 mb-4">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">F</span>
+        <div className="flex items-center justify-between px-3 py-4 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">F</span>
+            </div>
+            <span className="font-semibold text-lg text-foreground">FinançaJá</span>
           </div>
-          <span className="font-semibold text-lg text-foreground">FinançaJá</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full"
+            onClick={toggleTheme}
+            title={theme === "light" ? "Modo escuro" : "Modo claro"}
+          >
+            {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+          </Button>
         </div>
         {navItems.map((item) => (
           <NavLink
@@ -42,6 +57,23 @@ const AppLayout = () => {
 
       {/* Main content */}
       <main className="flex-1 md:ml-60 pb-20 md:pb-6">
+        {/* Mobile top bar */}
+        <div className="md:hidden flex items-center justify-between px-4 py-3 border-b bg-card sticky top-0 z-40">
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-xs">F</span>
+            </div>
+            <span className="font-semibold text-foreground">FinançaJá</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full"
+            onClick={toggleTheme}
+          >
+            {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+          </Button>
+        </div>
         <div className="max-w-4xl mx-auto p-4 md:p-6">
           <Outlet />
         </div>

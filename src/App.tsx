@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { FinanceProvider } from "./contexts/FinanceContext";
+import { ThemeProvider } from "./components/ThemeProvider";
 import AppLayout from "./components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Lancamentos from "./pages/Lancamentos";
@@ -17,25 +18,27 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <FinanceProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route element={<AppLayout />}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/lancamentos" element={<Lancamentos />} />
-              <Route path="/categorias" element={<Categorias />} />
-              <Route path="/limites" element={<LimiteGastos />} />
-              <Route path="/caixinha" element={<Caixinha />} />
-              <Route path="/desafio" element={<Desafio52Semanas />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </FinanceProvider>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <FinanceProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route element={<AppLayout />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/lancamentos" element={<Lancamentos />} />
+                <Route path="/categorias" element={<Categorias />} />
+                <Route path="/limites" element={<LimiteGastos />} />
+                <Route path="/caixinha" element={<Caixinha />} />
+                <Route path="/desafio" element={<Desafio52Semanas />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </FinanceProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
