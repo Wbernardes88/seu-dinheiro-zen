@@ -7,6 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 
+import InsightCard from "@/components/dashboard/InsightCard";
+import BudgetAlerts from "@/components/dashboard/BudgetAlerts";
+import SavingsGoalsWidget from "@/components/dashboard/SavingsGoalsWidget";
+import ChallengeWidget from "@/components/dashboard/ChallengeWidget";
+import BalanceEvolutionChart from "@/components/dashboard/BalanceEvolutionChart";
+
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const shortMonthLabels = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 
@@ -59,7 +65,6 @@ const Dashboard = () => {
 
   const totalCategorySpending = categorySpending.reduce((s, c) => s + c.value, 0);
 
-  // Find category icon for a transaction
   const getCategoryIcon = (categoryName: string) => {
     const cat = categories.find((c) => c.name === categoryName);
     return cat?.icon || (categoryName === "income" ? "↑" : "↓");
@@ -79,7 +84,7 @@ const Dashboard = () => {
         </Button>
       </div>
 
-      {/* Month/Year selector dropdowns */}
+      {/* Month/Year selector */}
       <div className="flex items-center gap-3">
         <Select value={month.toString()} onValueChange={(v) => setMonth(Number(v))}>
           <SelectTrigger className="w-[140px] bg-card shadow-sm">
@@ -102,6 +107,12 @@ const Dashboard = () => {
           </SelectContent>
         </Select>
       </div>
+
+      {/* Budget Alerts */}
+      <BudgetAlerts />
+
+      {/* Insight */}
+      <InsightCard month={month} year={year} />
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -128,7 +139,7 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Charts */}
+      {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Bar chart */}
         <div className="bg-card rounded-2xl border shadow-sm p-5 transition-shadow hover:shadow-md">
@@ -212,6 +223,15 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Balance evolution */}
+      <BalanceEvolutionChart month={month} year={year} />
+
+      {/* Goals & Challenge widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <SavingsGoalsWidget />
+        <ChallengeWidget />
+      </div>
+
       {/* Recent transactions */}
       <div className="bg-card rounded-2xl border shadow-sm p-5 transition-shadow hover:shadow-md">
         <h3 className="text-sm font-semibold text-foreground mb-4">Últimos lançamentos</h3>
@@ -246,7 +266,6 @@ const Dashboard = () => {
   );
 };
 
-// Summary card component
 const SummaryCard = ({
   icon, label, value, colorClass, bgClass,
 }: {
@@ -256,7 +275,7 @@ const SummaryCard = ({
   colorClass: string;
   bgClass: string;
 }) => (
-  <div className="bg-card rounded-2xl border shadow-sm p-5 transition-all hover:shadow-md hover:-translate-y-0.5 duration-200">
+  <div className="bg-card rounded-2xl border shadow-sm p-5 transition-all hover:shadow-md hover:-translate-y-0.5 duration-200 animate-fade-in">
     <div className="flex items-center gap-4">
       <div className={`h-12 w-12 rounded-xl ${bgClass} flex items-center justify-center shrink-0`}>
         {icon}
