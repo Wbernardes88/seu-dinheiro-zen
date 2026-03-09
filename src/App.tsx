@@ -15,7 +15,7 @@ import Caixinha from "./pages/Caixinha";
 import Desafio52Semanas from "./pages/Desafio52Semanas";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
-import CoupleSetup from "./pages/CoupleSetup";
+import CoupleManage from "./pages/CoupleManage";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
