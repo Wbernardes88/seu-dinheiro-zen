@@ -56,7 +56,24 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [weeks, setWeeks] = useState(defaultChallenge52Weeks);
 
   const addTransaction = useCallback((t: Omit<Transaction, "id">) => {
-    setTransactions((prev) => [{ ...t, id: Date.now().toString() }, ...prev]);
+    const newTransaction = { ...t, id: Date.now().toString() };
+    setTransactions((prev) => [newTransaction, ...prev]);
+
+    // If recurring, generate for next 11 months
+    if (t.isRecurring) {
+      const baseDate = parseLocalDate(t.date);
+      const recurring: Transaction[] = [];
+      for (let i = 1; i <= 11; i++) {
+        const nextDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, Math.min(baseDate.getDate(), new Date(baseDate.getFullYear(), baseDate.getMonth() + i + 1, 0).getDate()));
+        const dateStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, "0")}-${String(nextDate.getDate()).padStart(2, "0")}`;
+        recurring.push({
+          ...t,
+          id: `${Date.now()}-rec-${i}`,
+          date: dateStr,
+        });
+      }
+      setTransactions((prev) => [...recurring, ...prev]);
+    }
   }, []);
 
   const deleteTransaction = useCallback((id: string) => {
