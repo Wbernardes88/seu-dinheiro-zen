@@ -13,7 +13,7 @@ const ChallengeWidget = React.forwardRef<HTMLDivElement>((_, ref) => {
   const completedWeeks = challenge52Weeks.filter((w) => w.completed).length;
 
   return (
-    <div className="bg-card rounded-2xl border shadow-sm p-5 transition-shadow hover:shadow-md animate-fade-in">
+    <div ref={ref} className="bg-card rounded-2xl border shadow-sm p-5 transition-shadow hover:shadow-md animate-fade-in">
       <div className="flex items-center gap-2 mb-4">
         <Trophy className="h-4 w-4 text-chart-3" />
         <h3 className="text-sm font-semibold text-foreground">Desafio 52 Semanas</h3>
