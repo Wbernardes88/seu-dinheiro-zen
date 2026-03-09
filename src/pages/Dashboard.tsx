@@ -170,6 +170,9 @@ const Dashboard = () => {
         />
       </div>
 
+      {/* Daily budget */}
+      <DailyBudgetCard month={month} year={year} />
+
       {/* Forecast & Health */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <BalanceForecastCard month={month} year={year} />
