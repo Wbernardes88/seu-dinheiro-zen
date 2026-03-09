@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
 import { parseLocalDate } from "@/lib/data";
 import {
@@ -127,19 +127,21 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   // Compute spent per category from transactions for budget limits
-  const computedBudgetLimits = budgetLimits.map((bl) => {
+  const computedBudgetLimits = useMemo(() => {
     const now = new Date();
-    const spent = transactions
-      .filter(
-        (t) =>
-          t.type === "expense" &&
-          t.category === bl.category &&
-           parseLocalDate(t.date).getMonth() === now.getMonth() &&
-           parseLocalDate(t.date).getFullYear() === now.getFullYear()
-      )
-      .reduce((sum, t) => sum + t.amount, 0);
-    return { ...bl, spent };
-  });
+    return budgetLimits.map((bl) => {
+      const spent = transactions
+        .filter(
+          (t) =>
+            t.type === "expense" &&
+            t.category === bl.category &&
+            parseLocalDate(t.date).getMonth() === now.getMonth() &&
+            parseLocalDate(t.date).getFullYear() === now.getFullYear()
+        )
+        .reduce((sum, t) => sum + t.amount, 0);
+      return { ...bl, spent };
+    });
+  }, [budgetLimits, transactions]);
 
   // Track previous percentages to only alert on changes
   const prevPctRef = useRef<Record<string, number>>({});
