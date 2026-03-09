@@ -14,6 +14,7 @@ import ChallengeWidget from "@/components/dashboard/ChallengeWidget";
 import BalanceEvolutionChart from "@/components/dashboard/BalanceEvolutionChart";
 import BalanceForecastCard from "@/components/dashboard/BalanceForecastCard";
 import FinancialHealthCard from "@/components/dashboard/FinancialHealthCard";
+import DailyBudgetCard from "@/components/dashboard/DailyBudgetCard";
 
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const shortMonthLabels = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
@@ -25,6 +26,13 @@ const pieColors = [
 ];
 
 const yearOptions = Array.from({ length: 5 }, (_, i) => 2024 + i);
+
+const getGreeting = () => {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return "Bom dia ☀️";
+  if (h >= 12 && h < 18) return "Boa tarde 🌤";
+  return "Boa noite 🌙";
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -101,7 +109,7 @@ const Dashboard = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Olá! 👋</h1>
+          <h1 className="text-2xl font-bold text-foreground">{getGreeting()}</h1>
           <p className="text-sm text-muted-foreground">{months[now.getMonth()]} de {now.getFullYear()}</p>
         </div>
         <Button size="sm" onClick={() => navigate("/lancamentos")} className="gap-1.5 shadow-md hover:shadow-lg transition-shadow">
@@ -168,6 +176,9 @@ const Dashboard = () => {
           invertComparison
         />
       </div>
+
+      {/* Daily budget */}
+      <DailyBudgetCard month={month} year={year} />
 
       {/* Forecast & Health */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
