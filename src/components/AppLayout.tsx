@@ -60,13 +60,22 @@ const AppLayout = () => {
         ))}
 
         {/* User info + logout at bottom */}
-        <div className="mt-auto border-t pt-3 px-2 space-y-2">
-          <div className="flex items-center gap-2 px-1">
+        <div className="mt-auto border-t pt-3 px-2 space-y-1">
+          <div className="flex items-center gap-2 px-1 mb-2">
             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
               <span className="text-primary text-xs font-semibold">{initials}</span>
             </div>
             <span className="text-sm font-medium text-foreground truncate">{displayName}</span>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-muted-foreground"
+            onClick={() => navigate("/casal")}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            Convidar parceiro(a)
+          </Button>
           <Button
             variant="ghost"
             size="sm"
