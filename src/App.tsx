@@ -22,7 +22,7 @@ import { Loader2 } from "lucide-react";
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, coupleId, coupleLoading } = useAuth();
+  const { user, loading, coupleLoading } = useAuth();
 
   if (loading || coupleLoading) {
     return (
@@ -33,7 +33,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!user) return <Navigate to="/auth" replace />;
-  if (!coupleId) return <CoupleSetup />;
 
   return <>{children}</>;
 };

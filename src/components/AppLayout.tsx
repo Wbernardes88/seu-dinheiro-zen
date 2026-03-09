@@ -1,5 +1,5 @@
-import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon, LogOut } from "lucide-react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon, LogOut, Users } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
