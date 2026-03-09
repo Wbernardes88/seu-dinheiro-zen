@@ -2,8 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { FinanceProvider } from "./contexts/FinanceContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/ThemeProvider";
 import AppLayout from "./components/AppLayout";
 import Dashboard from "./pages/Dashboard";
@@ -12,20 +13,51 @@ import Categorias from "./pages/Categorias";
 import LimiteGastos from "./pages/LimiteGastos";
 import Caixinha from "./pages/Caixinha";
 import Desafio52Semanas from "./pages/Desafio52Semanas";
+import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
+import CoupleSetup from "./pages/CoupleSetup";
 import NotFound from "./pages/NotFound";
+import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading, coupleId, coupleLoading } = useAuth();
+
+  if (loading || coupleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) return <Navigate to="/auth" replace />;
+  if (!coupleId) return <CoupleSetup />;
+
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <TooltipProvider>
-        <FinanceProvider>
+        <AuthProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route element={<AppLayout />}>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <FinanceProvider>
+                      <AppLayout />
+                    </FinanceProvider>
+                  </ProtectedRoute>
+                }
+              >
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/lancamentos" element={<Lancamentos />} />
                 <Route path="/categorias" element={<Categorias />} />
@@ -36,7 +68,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </FinanceProvider>
+        </AuthProvider>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
