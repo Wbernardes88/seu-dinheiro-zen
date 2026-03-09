@@ -3,7 +3,7 @@ import { useFinance } from "@/contexts/FinanceContext";
 import { formatCurrency } from "@/lib/data";
 import { Progress } from "@/components/ui/progress";
 
-const ChallengeWidget = () => {
+const ChallengeWidget = React.forwardRef<HTMLDivElement>((_, ref) => {
   const { challenge52Weeks } = useFinance();
 
   const totalTarget = challenge52Weeks.reduce((s, w) => s + w.amount, 0);
