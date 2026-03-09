@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { formatCurrency, paymentMethods, parseLocalDate } from "@/lib/data";
 import { toast } from "sonner";
-import { Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
@@ -19,6 +20,7 @@ const Lancamentos = () => {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [isRecurring, setIsRecurring] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
 
   // Filter state
@@ -53,12 +55,14 @@ const Lancamentos = () => {
       description,
       paymentMethod,
       amount: parseFloat(amount),
+      isRecurring,
     });
     setDescription("");
     setAmount("");
     setCategory("");
     setPaymentMethod("");
-    toast.success("Lançamento adicionado!");
+    setIsRecurring(false);
+    toast.success(isRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!");
   };
 
   const prevMonth = () => {
@@ -127,6 +131,16 @@ const Lancamentos = () => {
           <Input type="number" step="0.01" min="0" placeholder="0,00" value={amount} onChange={(e) => setAmount(e.target.value)} />
         </div>
 
+        <div className="flex items-center justify-between py-2 px-1">
+          <div className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4 text-muted-foreground" />
+            <Label className="text-xs font-medium text-foreground cursor-pointer" htmlFor="recurring-toggle">
+              Lançamento recorrente mensal
+            </Label>
+          </div>
+          <Switch id="recurring-toggle" checked={isRecurring} onCheckedChange={setIsRecurring} />
+        </div>
+
         <Button type="submit" className="w-full">Adicionar lançamento</Button>
       </form>
 
@@ -180,7 +194,10 @@ const Lancamentos = () => {
                     {t.type === "income" ? "↑" : "↓"}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{t.description}</p>
+                    <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
+                      {t.description}
+                      {t.isRecurring && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium shrink-0">🔄</span>}
+                    </p>
                     <p className="text-xs text-muted-foreground">{t.category} · {t.paymentMethod} · {t.date}</p>
                   </div>
                 </div>

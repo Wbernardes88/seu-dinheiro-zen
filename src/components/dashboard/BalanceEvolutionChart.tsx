@@ -48,10 +48,12 @@ const BalanceEvolutionChart = ({ month, year }: Props) => {
             contentStyle={{
               borderRadius: "12px",
               border: "1px solid hsl(var(--border))",
-              background: "hsl(var(--card))",
-              color: "hsl(var(--foreground))",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              background: "hsl(var(--popover))",
+              color: "hsl(var(--popover-foreground))",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
             }}
+            labelStyle={{ color: "hsl(var(--popover-foreground))" }}
+            itemStyle={{ color: "hsl(var(--popover-foreground))" }}
           />
           <Area
             type="monotone"

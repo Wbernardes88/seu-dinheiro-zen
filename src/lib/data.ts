@@ -8,6 +8,7 @@ export type Transaction = {
   description: string;
   paymentMethod: string;
   amount: number;
+  isRecurring?: boolean;
 };
 
 export type Category = {
