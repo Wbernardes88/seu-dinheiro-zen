@@ -131,6 +131,16 @@ const Lancamentos = () => {
           <Input type="number" step="0.01" min="0" placeholder="0,00" value={amount} onChange={(e) => setAmount(e.target.value)} />
         </div>
 
+        <div className="flex items-center justify-between py-2 px-1">
+          <div className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4 text-muted-foreground" />
+            <Label className="text-xs font-medium text-foreground cursor-pointer" htmlFor="recurring-toggle">
+              Lançamento recorrente mensal
+            </Label>
+          </div>
+          <Switch id="recurring-toggle" checked={isRecurring} onCheckedChange={setIsRecurring} />
+        </div>
+
         <Button type="submit" className="w-full">Adicionar lançamento</Button>
       </form>
 
