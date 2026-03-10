@@ -106,6 +106,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
           current: Number(g.current),
           icon: g.icon,
           deadline: g.deadline || undefined,
+          responsible: (g as any).responsible || "both",
         })));
       }
 
@@ -145,7 +146,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "savings_goals", filter: `couple_id=eq.${coupleId}` }, () => {
         supabase.from("savings_goals").select("*").eq("couple_id", coupleId).then(({ data }) => {
-          if (data) setSavingsGoals(data.map((g) => ({ id: g.id, name: g.name, target: Number(g.target), current: Number(g.current), icon: g.icon, deadline: g.deadline || undefined })));
+          if (data) setSavingsGoals(data.map((g) => ({ id: g.id, name: g.name, target: Number(g.target), current: Number(g.current), icon: g.icon, deadline: g.deadline || undefined, responsible: (g as any).responsible || "both" })));
         });
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "challenge_weeks", filter: `couple_id=eq.${coupleId}` }, () => {
@@ -321,7 +322,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       current: g.current,
       icon: g.icon,
       deadline: g.deadline || null,
-    });
+      responsible: g.responsible || "both",
+    } as any);
   }, [coupleId]);
 
   const updateSavingsGoal = useCallback(async (id: string, g: Partial<Omit<SavingsGoal, "id">>) => {
@@ -331,7 +333,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...(g.current !== undefined && { current: g.current }),
       ...(g.icon !== undefined && { icon: g.icon }),
       ...(g.deadline !== undefined && { deadline: g.deadline || null }),
-    }).eq("id", id);
+      ...(g.responsible !== undefined && { responsible: g.responsible }),
+    } as any).eq("id", id);
   }, []);
 
   const deleteSavingsGoal = useCallback(async (id: string) => {

@@ -1,17 +1,86 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/lib/data";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, TrendingUp, Calendar, Target, Users } from "lucide-react";
 import { toast } from "sonner";
 import type { SavingsGoal } from "@/lib/data";
 
+function getGoalCalculations(goal: SavingsGoal) {
+  const remaining = Math.max(goal.target - goal.current, 0);
+  const pct = goal.target > 0 ? Math.min((goal.current / goal.target) * 100, 100) : 0;
+
+  let monthsLeft: number | null = null;
+  let weeksLeft: number | null = null;
+  let perMonth: number | null = null;
+  let perWeek: number | null = null;
+  let forecastDate: string | null = null;
+
+  if (goal.deadline) {
+    const now = new Date();
+    const deadline = new Date(goal.deadline + "T00:00:00");
+    const diffMs = deadline.getTime() - now.getTime();
+    const diffDays = Math.max(Math.ceil(diffMs / (1000 * 60 * 60 * 24)), 0);
+    monthsLeft = Math.max(Math.ceil(diffDays / 30), 0);
+    weeksLeft = Math.max(Math.ceil(diffDays / 7), 0);
+
+    if (monthsLeft > 0 && remaining > 0) {
+      perMonth = Math.round((remaining / monthsLeft) * 100) / 100;
+    }
+    if (weeksLeft > 0 && remaining > 0) {
+      perWeek = Math.round((remaining / weeksLeft) * 100) / 100;
+    }
+  }
+
+  // Forecast: estimate based on average monthly contribution (current / months elapsed since creation)
+  if (goal.current > 0 && remaining > 0) {
+    // Simple forecast: if no deadline, show estimated months to completion
+    // assuming same pace continues
+    const createdAt = (goal as any).createdAt;
+    // Use a simpler approach: months needed at current pace
+    if (goal.deadline) {
+      forecastDate = goal.deadline;
+    }
+  }
+
+  return { remaining, pct, monthsLeft, weeksLeft, perMonth, perWeek, forecastDate };
+}
+
+function getMotivationalMessage(goal: SavingsGoal) {
+  const { remaining, pct, monthsLeft, perMonth } = getGoalCalculations(goal);
+
+  if (pct >= 100) return { text: "🎉 Parabéns! Meta alcançada!", color: "text-green-600 dark:text-green-400" };
+
+  if (pct >= 75) return { text: "🔥 Quase lá! Você já passou de 75% da meta!", color: "text-green-600 dark:text-green-400" };
+
+  if (pct >= 50) return { text: "💪 Metade do caminho! Continue firme!", color: "text-primary" };
+
+  if (monthsLeft !== null && monthsLeft > 0) {
+    if (perMonth && perMonth > 0) {
+      const extraPerMonth = Math.round(perMonth * 0.2 * 100) / 100;
+      if (monthsLeft <= 3) {
+        return { text: `⏰ Faltam ${monthsLeft} ${monthsLeft === 1 ? "mês" : "meses"}! Se aumentar ${formatCurrency(extraPerMonth)}/mês, alcançará antes.`, color: "text-amber-600 dark:text-amber-400" };
+      }
+      return { text: `📅 Faltam ${monthsLeft} meses para concluir. Você está no ritmo!`, color: "text-muted-foreground" };
+    }
+  }
+
+  if (pct > 0) {
+    return { text: "🚀 Bom começo! Mantenha a consistência.", color: "text-muted-foreground" };
+  }
+
+  return { text: "✨ Comece hoje! Cada real conta.", color: "text-muted-foreground" };
+}
+
 const Caixinha = () => {
   const { savingsGoals, addSavingsGoal, updateSavingsGoal, deleteSavingsGoal } = useFinance();
+  const { coupleMembers, user } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<SavingsGoal | null>(null);
   const [name, setName] = useState("");
@@ -19,10 +88,28 @@ const Caixinha = () => {
   const [current, setCurrent] = useState("");
   const [deadline, setDeadline] = useState("");
   const [icon, setIcon] = useState("💰");
+  const [responsible, setResponsible] = useState("both");
 
   const totalSaved = savingsGoals.reduce((s, g) => s + g.current, 0);
+  const totalTarget = savingsGoals.reduce((s, g) => s + g.target, 0);
 
   const emojiOptions = ["💰", "✈️", "🛡️", "🚗", "🏠", "📚", "💻", "🎮", "👶", "💍", "🏖️", "🎓"];
+
+  const responsibleOptions = useMemo(() => {
+    const opts: { value: string; label: string }[] = [
+      { value: "both", label: "Ambos" },
+    ];
+    coupleMembers.forEach((m) => {
+      opts.push({ value: m.userId, label: m.nickname || m.displayName });
+    });
+    return opts;
+  }, [coupleMembers]);
+
+  const getResponsibleLabel = (val: string | undefined) => {
+    if (!val || val === "both") return "Ambos";
+    const member = coupleMembers.find((m) => m.userId === val);
+    return member ? (member.nickname || member.displayName) : "—";
+  };
 
   const openNew = () => {
     setEditing(null);
@@ -31,6 +118,7 @@ const Caixinha = () => {
     setCurrent("0");
     setDeadline("");
     setIcon("💰");
+    setResponsible("both");
     setDialogOpen(true);
   };
 
@@ -41,6 +129,7 @@ const Caixinha = () => {
     setCurrent(g.current.toString());
     setDeadline(g.deadline || "");
     setIcon(g.icon);
+    setResponsible(g.responsible || "both");
     setDialogOpen(true);
   };
 
@@ -55,6 +144,7 @@ const Caixinha = () => {
       current: parseFloat(current || "0"),
       deadline: deadline || undefined,
       icon,
+      responsible,
     };
     if (editing) {
       updateSavingsGoal(editing.id, data);
@@ -73,6 +163,9 @@ const Caixinha = () => {
           <h1 className="text-2xl font-bold text-foreground">Caixinha</h1>
           <p className="text-sm text-muted-foreground">
             Total guardado: <span className="font-semibold text-primary">{formatCurrency(totalSaved)}</span>
+            {totalTarget > 0 && (
+              <span> de {formatCurrency(totalTarget)}</span>
+            )}
           </p>
         </div>
         <Button size="sm" onClick={openNew} className="gap-1.5">
@@ -89,9 +182,11 @@ const Caixinha = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {savingsGoals.map((goal) => {
-            const pct = goal.target > 0 ? Math.min((goal.current / goal.target) * 100, 100) : 0;
+            const calc = getGoalCalculations(goal);
+            const motivation = getMotivationalMessage(goal);
             return (
               <div key={goal.id} className="card-glass p-4 space-y-3 group">
+                {/* Header */}
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{goal.icon}</span>
                   <div className="flex-1 min-w-0">
@@ -108,12 +203,50 @@ const Caixinha = () => {
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {formatCurrency(goal.current)} de {formatCurrency(goal.target)}
-                      {goal.deadline && ` · até ${goal.deadline}`}
+                      {goal.deadline && ` · até ${new Date(goal.deadline + "T00:00:00").toLocaleDateString("pt-BR")}`}
                     </p>
                   </div>
-                  <span className="text-xs font-bold text-primary">{pct.toFixed(0)}%</span>
+                  <span className="text-xs font-bold text-primary">{calc.pct.toFixed(0)}%</span>
                 </div>
-                <Progress value={pct} className="h-2" />
+
+                <Progress value={calc.pct} className="h-2" />
+
+                {/* Responsible */}
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Users className="h-3 w-3" />
+                  <span>Responsável: <span className="font-medium text-foreground">{getResponsibleLabel(goal.responsible)}</span></span>
+                </div>
+
+                {/* Calculations */}
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Target className="h-3 w-3 shrink-0" />
+                    <span>Faltam: <span className="font-medium text-foreground">{formatCurrency(calc.remaining)}</span></span>
+                  </div>
+                  {calc.perMonth !== null && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Calendar className="h-3 w-3 shrink-0" />
+                      <span>{formatCurrency(calc.perMonth)}/mês</span>
+                    </div>
+                  )}
+                  {calc.perWeek !== null && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <TrendingUp className="h-3 w-3 shrink-0" />
+                      <span>{formatCurrency(calc.perWeek)}/sem</span>
+                    </div>
+                  )}
+                  {calc.monthsLeft !== null && calc.monthsLeft > 0 && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Calendar className="h-3 w-3 shrink-0" />
+                      <span>{calc.monthsLeft} {calc.monthsLeft === 1 ? "mês" : "meses"} restante{calc.monthsLeft > 1 ? "s" : ""}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Motivational message */}
+                <p className={`text-xs ${motivation.color} italic`}>
+                  {motivation.text}
+                </p>
               </div>
             );
           })}
@@ -154,6 +287,19 @@ const Caixinha = () => {
             <div className="space-y-1.5">
               <Label className="text-xs">Prazo (opcional)</Label>
               <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Responsável</Label>
+              <Select value={responsible} onValueChange={setResponsible}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {responsibleOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>
