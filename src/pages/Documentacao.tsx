@@ -32,11 +32,12 @@ const Documentacao = () => {
       <Section title="🔮 Previsão de Saldo">
         <p className="text-sm text-muted-foreground mb-2">Projeta o saldo ao final do mês atual separando gastos fixos e variáveis:</p>
         <ul className="text-sm text-muted-foreground space-y-1.5 list-disc list-inside">
-          <li><strong>Gastos fixos (🔄 recorrentes)</strong> — já são contabilizados integralmente, sem projeção extra.</li>
-          <li><strong>Gastos variáveis</strong> — a média diária até hoje é projetada para os dias restantes do mês.</li>
+          <li><strong>Gastos fixos (📌)</strong> — lançamentos marcados como "fixo" no formulário ou na listagem. São contabilizados integralmente, sem projeção extra.</li>
+          <li><strong>Gastos variáveis</strong> — todos os demais. A média diária até hoje é projetada para os dias restantes do mês.</li>
           <li><strong>Previsão</strong> = Entradas − (Fixos + Variáveis projetados).</li>
         </ul>
         <p className="text-sm text-muted-foreground mt-2">Se a previsão for negativa, o card sugere quanto reduzir por dia para fechar o mês positivo.</p>
+        <p className="text-sm text-muted-foreground mt-1">💡 Para marcar um lançamento existente como fixo, clique no ícone 📌 na lista de lançamentos.</p>
       </Section>
 
       <Section title="⚠️ Alertas de Limite" text="Avisa quando seus gastos em uma categoria atingem 80% do limite definido, e alerta quando ultrapassa 100%." />
