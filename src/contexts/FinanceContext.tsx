@@ -204,8 +204,25 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [coupleId, user]);
 
   const deleteTransaction = useCallback(async (id: string) => {
-    await supabase.from("transactions").delete().eq("id", id);
-  }, []);
+    // Optimistic removal
+    setTransactions((prev) => prev.filter((t) => t.id !== id));
+    
+    const { error } = await supabase.from("transactions").delete().eq("id", id);
+    if (error) {
+      console.error("deleteTransaction error:", error);
+      toast.error("Erro ao remover lançamento. Tente novamente.");
+      // Refetch to restore state on error
+      if (coupleId) {
+        const { data } = await supabase.from("transactions").select("*").eq("couple_id", coupleId).order("date", { ascending: false });
+        if (data) {
+          setTransactions(data.map((t) => ({
+            id: t.id, date: t.date, type: t.type as "income" | "expense", category: t.category,
+            description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount), isRecurring: t.is_recurring, userId: t.user_id,
+          })));
+        }
+      }
+    }
+  }, [coupleId]);
 
   // ---- CATEGORIES ----
   const addCategory = useCallback(async (c: Omit<Category, "id">) => {
