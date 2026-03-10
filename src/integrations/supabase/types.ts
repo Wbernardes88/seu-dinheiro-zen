@@ -256,6 +256,7 @@ export type Database = {
           icon: string
           id: string
           name: string
+          responsible: string
           target: number
           updated_at: string
         }
@@ -267,6 +268,7 @@ export type Database = {
           icon?: string
           id?: string
           name: string
+          responsible?: string
           target: number
           updated_at?: string
         }
@@ -278,6 +280,7 @@ export type Database = {
           icon?: string
           id?: string
           name?: string
+          responsible?: string
           target?: number
           updated_at?: string
         }
