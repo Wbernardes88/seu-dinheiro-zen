@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/lib/data";
 import { CheckCircle2, Circle, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Desafio52Semanas = () => {
   const { challenge52Weeks, toggleWeek } = useFinance();
+  const { coupleId } = useAuth();
 
   const defaultGoal = challenge52Weeks.reduce((s, w) => s + w.amount, 0);
   const [customGoal, setCustomGoal] = useState<number | null>(null);
@@ -23,9 +27,23 @@ const Desafio52Semanas = () => {
     setEditing(true);
   };
 
-  const handleEditConfirm = () => {
+  const handleEditConfirm = async () => {
     const val = parseFloat(editValue);
-    if (!isNaN(val) && val > 0) setCustomGoal(val);
+    if (!isNaN(val) && val >= 0) {
+      setCustomGoal(val);
+      // Reset all weeks when goal changes
+      if (coupleId) {
+        const { error } = await supabase.rpc("reset_challenge_weeks" as any, {
+          p_couple_id: coupleId,
+        });
+        if (error) {
+          console.error("reset error:", error);
+          toast.error("Erro ao resetar semanas.");
+        } else {
+          toast.success("Meta atualizada e semanas resetadas!");
+        }
+      }
+    }
     setEditing(false);
   };
 
