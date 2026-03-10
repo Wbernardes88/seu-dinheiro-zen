@@ -74,6 +74,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
           paymentMethod: t.payment_method,
           amount: Number(t.amount),
           isRecurring: t.is_recurring,
+          userId: t.user_id,
         })));
       }
 
