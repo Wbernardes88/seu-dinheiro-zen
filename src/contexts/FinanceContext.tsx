@@ -418,6 +418,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         transactions,
         addTransaction,
         deleteTransaction,
+        updateTransaction,
         categories,
         addCategory,
         updateCategory,
