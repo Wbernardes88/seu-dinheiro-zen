@@ -14,6 +14,7 @@ import LimiteGastos from "./pages/LimiteGastos";
 import Caixinha from "./pages/Caixinha";
 import Desafio52Semanas from "./pages/Desafio52Semanas";
 import Auth from "./pages/Auth";
+import Documentacao from "./pages/Documentacao";
 import ResetPassword from "./pages/ResetPassword";
 import CoupleManage from "./pages/CoupleManage";
 import NotFound from "./pages/NotFound";
