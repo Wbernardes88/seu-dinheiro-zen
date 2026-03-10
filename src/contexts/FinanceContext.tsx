@@ -269,7 +269,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!coupleId) return;
     const w = weeks.find((w) => w.week === week);
     if (!w) return;
-    await supabase
+    const { error } = await supabase
       .from("challenge_weeks")
       .update({
         completed: !w.completed,
@@ -277,6 +277,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       })
       .eq("couple_id", coupleId)
       .eq("week", week);
+    if (error) {
+      console.error("toggleWeek error:", error);
+      toast.error("Erro ao atualizar semana. Tente novamente.");
+    }
   }, [coupleId, weeks]);
 
   // Compute spent per category from transactions for budget limits
