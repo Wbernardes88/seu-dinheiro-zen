@@ -24,14 +24,21 @@ const BalanceForecastCard = ({ month, year }: Props) => {
     const totalExpense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
 
     if (!isCurrentMonth) {
-      return { predicted: totalIncome - totalExpense, daysLeft: 0, dailyAvg: 0, isProjection: false, dailyReduction: 0 };
+      return { predicted: totalIncome - totalExpense, daysLeft: 0, dailyAvg: 0, isProjection: false, dailyReduction: 0, fixedExpense: 0, variableExpense: 0 };
     }
+
+    // Separate fixed (recurring) and variable expenses
+    const fixedExpense = filtered.filter((t) => t.type === "expense" && t.isRecurring).reduce((s, t) => s + t.amount, 0);
+    const variableExpense = filtered.filter((t) => t.type === "expense" && !t.isRecurring).reduce((s, t) => s + t.amount, 0);
 
     const dayOfMonth = now.getDate();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const daysLeft = daysInMonth - dayOfMonth;
-    const dailyAvgExpense = dayOfMonth > 0 ? totalExpense / dayOfMonth : 0;
-    const projectedExpense = totalExpense + dailyAvgExpense * daysLeft;
+
+    // Only project variable expenses forward; fixed are already fully accounted
+    const dailyAvgVariable = dayOfMonth > 0 ? variableExpense / dayOfMonth : 0;
+    const projectedVariableExpense = variableExpense + dailyAvgVariable * daysLeft;
+    const projectedExpense = fixedExpense + projectedVariableExpense;
     const predicted = totalIncome - projectedExpense;
 
     // How much to reduce daily to end positive
@@ -39,7 +46,7 @@ const BalanceForecastCard = ({ month, year }: Props) => {
       ? (Math.abs(predicted) / daysLeft)
       : 0;
 
-    return { predicted, daysLeft, dailyAvg: dailyAvgExpense, isProjection: true, dailyReduction };
+    return { predicted, daysLeft, dailyAvg: dailyAvgVariable, isProjection: true, dailyReduction, fixedExpense, variableExpense };
   }, [transactions, month, year]);
 
   const isNegative = forecast.predicted < 0;
@@ -63,7 +70,7 @@ const BalanceForecastCard = ({ month, year }: Props) => {
           </h3>
           {forecast.isProjection && (
             <p className="text-[10px] text-muted-foreground">
-              Faltam {forecast.daysLeft} dias · Média diária: {formatCurrency(forecast.dailyAvg)}
+              Faltam {forecast.daysLeft} dias · Média variável/dia: {formatCurrency(forecast.dailyAvg)}
             </p>
           )}
         </div>
