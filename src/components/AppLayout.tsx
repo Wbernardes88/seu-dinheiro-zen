@@ -80,6 +80,15 @@ const AppLayout = () => {
           <Button
             variant="ghost"
             size="sm"
+            className="w-full justify-start text-muted-foreground"
+            onClick={() => navigate("/documentacao")}
+          >
+            <BookOpen className="h-4 w-4 mr-2" />
+            Documentação
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             className="w-full justify-start text-muted-foreground hover:text-destructive"
             onClick={signOut}
           >
