@@ -333,7 +333,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ...(g.current !== undefined && { current: g.current }),
       ...(g.icon !== undefined && { icon: g.icon }),
       ...(g.deadline !== undefined && { deadline: g.deadline || null }),
-    }).eq("id", id);
+      ...(g.responsible !== undefined && { responsible: g.responsible }),
+    } as any).eq("id", id);
   }, []);
 
   const deleteSavingsGoal = useCallback(async (id: string) => {

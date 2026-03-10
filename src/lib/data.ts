@@ -34,6 +34,7 @@ export type SavingsGoal = {
   current: number;
   icon: string;
   deadline?: string;
+  responsible?: string; // user_id, "both", or undefined
 };
 
 export const incomeCategories: Category[] = [
