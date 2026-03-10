@@ -322,7 +322,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       current: g.current,
       icon: g.icon,
       deadline: g.deadline || null,
-    });
+      responsible: g.responsible || "both",
+    } as any);
   }, [coupleId]);
 
   const updateSavingsGoal = useCallback(async (id: string, g: Partial<Omit<SavingsGoal, "id">>) => {
