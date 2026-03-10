@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon, LogOut, Users } from "lucide-react";
+import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon, LogOut, Users, BookOpen } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -76,6 +76,15 @@ const AppLayout = () => {
           >
             <Users className="h-4 w-4 mr-2" />
             Convidar parceiro(a)
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-muted-foreground"
+            onClick={() => navigate("/documentacao")}
+          >
+            <BookOpen className="h-4 w-4 mr-2" />
+            Documentação
           </Button>
           <Button
             variant="ghost"
