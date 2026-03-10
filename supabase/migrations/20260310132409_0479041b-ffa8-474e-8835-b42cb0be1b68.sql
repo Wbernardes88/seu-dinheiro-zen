@@ -1,0 +1,1 @@
+UPDATE public.profiles SET nickname = SPLIT_PART(display_name, ' ', 1) WHERE nickname = '' AND display_name != '';
