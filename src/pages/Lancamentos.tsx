@@ -74,12 +74,14 @@ const Lancamentos = () => {
       paymentMethod,
       amount: parseFloat(amount),
       isRecurring,
+      isFixed,
     });
     setDescription("");
     setAmount("");
     setCategory("");
     setPaymentMethod("");
     setIsRecurring(false);
+    setIsFixed(false);
     toast.success(wasRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!");
     setTimeout(() => setIsSubmitting(false), 500);
   };
