@@ -218,7 +218,10 @@ const Lancamentos = () => {
                       {t.description}
                       {t.isRecurring && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium shrink-0">🔄</span>}
                     </p>
-                    <p className="text-xs text-muted-foreground">{t.category} · {t.paymentMethod} · {t.date}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.category} · {t.paymentMethod} · {t.date}
+                      {getNickname(t.userId) && <span className="ml-1">· por {getNickname(t.userId)}</span>}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
