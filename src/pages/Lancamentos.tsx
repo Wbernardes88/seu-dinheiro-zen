@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { formatCurrency, paymentMethods, parseLocalDate } from "@/lib/data";
 import { toast } from "sonner";
-import { Trash2, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight, RefreshCw, Pin } from "lucide-react";
 
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
