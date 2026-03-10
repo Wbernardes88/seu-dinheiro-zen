@@ -1,9 +1,11 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon, LogOut, Users, BookOpen } from "lucide-react";
+import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon, LogOut, Users, BookOpen, Menu } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import logo from "@/assets/logo.png";
+import { useState } from "react";
 
 const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Início" },
