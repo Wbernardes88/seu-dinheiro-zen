@@ -86,7 +86,7 @@ const Auth = () => {
             {mode === "forgot" && "Recuperar senha"}
           </CardTitle>
           <CardDescription>
-            {mode === "login" && "Controle financeiro para casais"}
+            {mode === "login" && "Organize suas finanças com simplicidade."}
             {mode === "signup" && "Comece a organizar suas finanças juntos"}
             {mode === "forgot" && "Enviaremos um link para redefinir sua senha"}
           </CardDescription>

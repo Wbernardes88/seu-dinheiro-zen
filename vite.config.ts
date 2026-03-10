@@ -20,9 +20,9 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "icon-192.png", "icon-512.png"],
       manifest: {
-        name: "FinançaJá - Controle Financeiro",
-        short_name: "FinançaJá",
-        description: "Controle suas finanças de forma simples e inteligente",
+        name: "FinançasJá - Organize suas finanças com simplicidade",
+        short_name: "FinançasJá",
+        description: "Organize suas finanças com simplicidade",
         theme_color: "#22a66e",
         background_color: "#f8fafb",
         display: "standalone",
