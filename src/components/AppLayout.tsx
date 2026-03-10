@@ -20,7 +20,7 @@ const AppLayout = () => {
   const { theme, toggleTheme } = useTheme();
   const { user, signOut, nickname, coupleMembers } = useAuth();
   const navigate = useNavigate();
-
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const displayName = nickname || user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Usuário";
   const initials = displayName.slice(0, 1).toUpperCase();
   const isCoupleMode = coupleMembers.length >= 2;
