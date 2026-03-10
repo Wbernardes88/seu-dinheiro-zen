@@ -230,6 +230,7 @@ const Lancamentos = () => {
                     <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
                       {t.description}
                       {t.isRecurring && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium shrink-0">🔄</span>}
+                      {t.isFixed && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent text-accent-foreground font-medium shrink-0">📌 Fixo</span>}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {t.category} · {t.paymentMethod} · {t.date}
@@ -237,10 +238,21 @@ const Lancamentos = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                   <span className={`text-sm font-semibold ${t.type === "income" ? "text-income" : "text-expense"}`}>
                     {t.type === "income" ? "+" : "-"}{formatCurrency(t.amount)}
                   </span>
+                  {t.type === "expense" && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`h-7 w-7 ${t.isFixed ? "text-primary opacity-100" : "opacity-0 group-hover:opacity-100 text-muted-foreground"}`}
+                      title={t.isFixed ? "Marcar como variável" : "Marcar como fixo"}
+                      onClick={() => updateTransaction(t.id, { isFixed: !t.isFixed })}
+                    >
+                      <Pin className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"
