@@ -18,7 +18,7 @@ const getLocalDateStr = () => {
 };
 
 const Lancamentos = () => {
-  const { transactions, addTransaction, deleteTransaction, categories } = useFinance();
+  const { transactions, addTransaction, deleteTransaction, updateTransaction, categories } = useFinance();
   const { coupleMembers } = useAuth();
 
   const getNickname = (userId?: string) => {
