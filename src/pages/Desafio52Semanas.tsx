@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/lib/data";
 import { CheckCircle2, Circle, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Desafio52Semanas = () => {
   const { challenge52Weeks, toggleWeek } = useFinance();
