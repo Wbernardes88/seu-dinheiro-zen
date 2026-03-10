@@ -29,8 +29,8 @@ const AppLayout = () => {
       <aside className="hidden md:flex flex-col w-60 border-r bg-card p-4 gap-1 fixed h-full">
         <div className="flex items-center justify-between px-3 py-4 mb-4">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="FinançaJá" className="h-8 w-8 rounded-lg object-contain" />
-            <span className="font-semibold text-lg text-foreground">FinançaJá</span>
+            <img src={logo} alt="FinançasJá" className="h-8 w-8 rounded-lg object-contain" />
+            <span className="font-semibold text-lg text-foreground">FinançasJá</span>
           </div>
           <Button
             variant="ghost"
