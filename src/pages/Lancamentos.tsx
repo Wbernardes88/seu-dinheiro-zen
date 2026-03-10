@@ -19,6 +19,13 @@ const getLocalDateStr = () => {
 
 const Lancamentos = () => {
   const { transactions, addTransaction, deleteTransaction, categories } = useFinance();
+  const { coupleMembers } = useAuth();
+
+  const getNickname = (userId?: string) => {
+    if (!userId) return "";
+    const member = coupleMembers.find((m) => m.userId === userId);
+    return member?.nickname || "";
+  };
 
   // Form state
   const [type, setType] = useState<"income" | "expense">("expense");
