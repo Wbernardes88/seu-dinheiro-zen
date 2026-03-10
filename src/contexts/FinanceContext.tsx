@@ -162,7 +162,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!coupleId || !user) return;
 
     const insertOne = async (data: Omit<Transaction, "id">) => {
-      await supabase.from("transactions").insert({
+      const result = await supabase.from("transactions").insert({
         couple_id: coupleId,
         user_id: user.id,
         date: data.date,
@@ -173,9 +173,15 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         amount: data.amount,
         is_recurring: data.isRecurring || false,
       });
+      return result;
     };
 
-    await insertOne(t);
+    const { error } = await insertOne(t);
+    if (error) {
+      console.error("addTransaction error:", error);
+      toast.error("Erro ao adicionar lançamento. Tente novamente.");
+      return;
+    }
 
     if (t.isRecurring) {
       const baseDate = parseLocalDate(t.date);
@@ -184,6 +190,15 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const dateStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, "0")}-${String(nextDate.getDate()).padStart(2, "0")}`;
         await insertOne({ ...t, date: dateStr });
       }
+    }
+
+    // Manual refetch as fallback in case realtime doesn't trigger
+    const { data } = await supabase.from("transactions").select("*").eq("couple_id", coupleId).order("date", { ascending: false });
+    if (data) {
+      setTransactions(data.map((t) => ({
+        id: t.id, date: t.date, type: t.type as "income" | "expense", category: t.category,
+        description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount), isRecurring: t.is_recurring,
+      })));
     }
   }, [coupleId, user]);
 
