@@ -98,9 +98,11 @@ const FinancialHealthCard = ({ month, year }: Props) => {
           </div>
         </div>
         <div>
-          <span className={`text-lg font-bold ${level.color}`}>{level.label}</span>
+          <span className={`text-lg font-bold ${level.color}`}>{hasData ? level.label : "Sem dados"}</span>
           <p className="text-xs text-muted-foreground mt-1">
-            Score baseado em saldo, limites, metas e receitas do mês.
+            {hasData
+              ? "Score baseado em saldo, limites, metas e receitas do mês."
+              : "Adicione lançamentos, limites ou metas para calcular seu score."}
           </p>
         </div>
       </div>
