@@ -146,7 +146,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "savings_goals", filter: `couple_id=eq.${coupleId}` }, () => {
         supabase.from("savings_goals").select("*").eq("couple_id", coupleId).then(({ data }) => {
-          if (data) setSavingsGoals(data.map((g) => ({ id: g.id, name: g.name, target: Number(g.target), current: Number(g.current), icon: g.icon, deadline: g.deadline || undefined })));
+          if (data) setSavingsGoals(data.map((g) => ({ id: g.id, name: g.name, target: Number(g.target), current: Number(g.current), icon: g.icon, deadline: g.deadline || undefined, responsible: (g as any).responsible || "both" })));
         });
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "challenge_weeks", filter: `couple_id=eq.${coupleId}` }, () => {
