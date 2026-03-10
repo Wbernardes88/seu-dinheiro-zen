@@ -70,7 +70,7 @@ const BalanceForecastCard = ({ month, year }: Props) => {
           </h3>
           {forecast.isProjection && (
             <p className="text-[10px] text-muted-foreground">
-              Faltam {forecast.daysLeft} dias · Média diária: {formatCurrency(forecast.dailyAvg)}
+              Faltam {forecast.daysLeft} dias · Média variável/dia: {formatCurrency(forecast.dailyAvg)}
             </p>
           )}
         </div>
