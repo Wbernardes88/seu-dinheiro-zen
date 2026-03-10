@@ -14,6 +14,7 @@ import LimiteGastos from "./pages/LimiteGastos";
 import Caixinha from "./pages/Caixinha";
 import Desafio52Semanas from "./pages/Desafio52Semanas";
 import Auth from "./pages/Auth";
+import Documentacao from "./pages/Documentacao";
 import ResetPassword from "./pages/ResetPassword";
 import CoupleManage from "./pages/CoupleManage";
 import NotFound from "./pages/NotFound";
@@ -64,6 +65,7 @@ const App = () => (
                 <Route path="/caixinha" element={<Caixinha />} />
                 <Route path="/desafio" element={<Desafio52Semanas />} />
                 <Route path="/casal" element={<CoupleManage />} />
+                <Route path="/documentacao" element={<Documentacao />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
