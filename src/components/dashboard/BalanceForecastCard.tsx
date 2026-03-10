@@ -36,7 +36,7 @@ const BalanceForecastCard = ({ month, year }: Props) => {
     const daysLeft = daysInMonth - dayOfMonth;
 
     // Only project variable expenses forward; fixed are already fully accounted
-    const dailyAvgVariable = dayOfMonth > 0 ? variableExpense / dayOfMonth : 0;
+    const dailyAvgVariable = dayOfMonth > 0 ? Math.round((variableExpense / dayOfMonth) * 100) / 100 : 0;
     const projectedVariableExpense = variableExpense + dailyAvgVariable * daysLeft;
     const projectedExpense = fixedExpense + projectedVariableExpense;
     const predicted = Math.round((totalIncome - projectedExpense) * 100) / 100;
