@@ -9,6 +9,7 @@ type FinanceContextType = {
   transactions: Transaction[];
   addTransaction: (t: Omit<Transaction, "id">) => void;
   deleteTransaction: (id: string) => Promise<boolean>;
+  updateTransaction: (id: string, updates: Partial<Pick<Transaction, "isFixed">>) => Promise<boolean>;
 
   categories: Category[];
   addCategory: (c: Omit<Category, "id">) => void;
@@ -74,6 +75,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
           paymentMethod: t.payment_method,
           amount: Number(t.amount),
           isRecurring: t.is_recurring,
+          isFixed: t.is_fixed,
           userId: t.user_id,
         })));
       }
@@ -127,7 +129,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         supabase.from("transactions").select("*").eq("couple_id", coupleId).order("date", { ascending: false }).then(({ data }) => {
           if (data) setTransactions(data.map((t) => ({
             id: t.id, date: t.date, type: t.type as "income" | "expense", category: t.category,
-            description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount), isRecurring: t.is_recurring, userId: t.user_id,
+            description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount), isRecurring: t.is_recurring, isFixed: t.is_fixed, userId: t.user_id,
           })));
         });
       })
@@ -173,6 +175,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         payment_method: data.paymentMethod,
         amount: data.amount,
         is_recurring: data.isRecurring || false,
+        is_fixed: data.isFixed || false,
       });
       return result;
     };
@@ -198,7 +201,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (data) {
       setTransactions(data.map((t) => ({
         id: t.id, date: t.date, type: t.type as "income" | "expense", category: t.category,
-        description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount), isRecurring: t.is_recurring, userId: t.user_id,
+        description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount), isRecurring: t.is_recurring, isFixed: t.is_fixed, userId: t.user_id,
       })));
     }
   }, [coupleId, user]);
@@ -235,6 +238,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             paymentMethod: t.payment_method,
             amount: Number(t.amount),
             isRecurring: t.is_recurring,
+            isFixed: t.is_fixed,
             userId: t.user_id,
           }))
         );
@@ -243,6 +247,23 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     return true;
   }, [coupleId, transactions]);
+
+  const updateTransaction = useCallback(async (id: string, updates: Partial<Pick<Transaction, "isFixed">>) => {
+    const prev = transactions;
+    setTransactions((t) => t.map((tx) => tx.id === id ? { ...tx, ...updates } : tx));
+
+    const { error } = await supabase.from("transactions").update({
+      ...(updates.isFixed !== undefined && { is_fixed: updates.isFixed }),
+    }).eq("id", id);
+
+    if (error) {
+      console.error("updateTransaction error:", error);
+      setTransactions(prev);
+      toast.error("Erro ao atualizar lançamento.");
+      return false;
+    }
+    return true;
+  }, [transactions]);
 
   // ---- CATEGORIES ----
   const addCategory = useCallback(async (c: Omit<Category, "id">) => {
@@ -397,6 +418,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         transactions,
         addTransaction,
         deleteTransaction,
+        updateTransaction,
         categories,
         addCategory,
         updateCategory,

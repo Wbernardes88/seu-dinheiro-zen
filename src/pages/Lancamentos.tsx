@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { formatCurrency, paymentMethods, parseLocalDate } from "@/lib/data";
 import { toast } from "sonner";
-import { Trash2, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { Trash2, ChevronLeft, ChevronRight, RefreshCw, Pin } from "lucide-react";
 
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
@@ -18,7 +18,7 @@ const getLocalDateStr = () => {
 };
 
 const Lancamentos = () => {
-  const { transactions, addTransaction, deleteTransaction, categories } = useFinance();
+  const { transactions, addTransaction, deleteTransaction, updateTransaction, categories } = useFinance();
   const { coupleMembers } = useAuth();
 
   const getNickname = (userId?: string) => {
@@ -35,6 +35,7 @@ const Lancamentos = () => {
   const [date, setDate] = useState(getLocalDateStr());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
+  const [isFixed, setIsFixed] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
 
   // Filter state
@@ -73,12 +74,14 @@ const Lancamentos = () => {
       paymentMethod,
       amount: parseFloat(amount),
       isRecurring,
+      isFixed,
     });
     setDescription("");
     setAmount("");
     setCategory("");
     setPaymentMethod("");
     setIsRecurring(false);
+    setIsFixed(false);
     toast.success(wasRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!");
     setTimeout(() => setIsSubmitting(false), 500);
   };
@@ -151,6 +154,16 @@ const Lancamentos = () => {
 
         <div className="flex items-center justify-between py-2 px-1">
           <div className="flex items-center gap-2">
+            <Pin className="h-4 w-4 text-muted-foreground" />
+            <Label className="text-xs font-medium text-foreground cursor-pointer" htmlFor="fixed-toggle">
+              Gasto fixo (aluguel, parcela, assinatura)
+            </Label>
+          </div>
+          <Switch id="fixed-toggle" checked={isFixed} onCheckedChange={setIsFixed} />
+        </div>
+
+        <div className="flex items-center justify-between py-2 px-1">
+          <div className="flex items-center gap-2">
             <RefreshCw className="h-4 w-4 text-muted-foreground" />
             <Label className="text-xs font-medium text-foreground cursor-pointer" htmlFor="recurring-toggle">
               Lançamento recorrente mensal
@@ -217,6 +230,7 @@ const Lancamentos = () => {
                     <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
                       {t.description}
                       {t.isRecurring && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium shrink-0">🔄</span>}
+                      {t.isFixed && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent text-accent-foreground font-medium shrink-0">📌 Fixo</span>}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {t.category} · {t.paymentMethod} · {t.date}
@@ -224,10 +238,21 @@ const Lancamentos = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                   <span className={`text-sm font-semibold ${t.type === "income" ? "text-income" : "text-expense"}`}>
                     {t.type === "income" ? "+" : "-"}{formatCurrency(t.amount)}
                   </span>
+                  {t.type === "expense" && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`h-7 w-7 ${t.isFixed ? "text-primary opacity-100" : "opacity-0 group-hover:opacity-100 text-muted-foreground"}`}
+                      title={t.isFixed ? "Marcar como variável" : "Marcar como fixo"}
+                      onClick={() => updateTransaction(t.id, { isFixed: !t.isFixed })}
+                    >
+                      <Pin className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"

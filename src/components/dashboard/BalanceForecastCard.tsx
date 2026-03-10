@@ -28,8 +28,8 @@ const BalanceForecastCard = ({ month, year }: Props) => {
     }
 
     // Separate fixed (recurring) and variable expenses
-    const fixedExpense = filtered.filter((t) => t.type === "expense" && t.isRecurring).reduce((s, t) => s + t.amount, 0);
-    const variableExpense = filtered.filter((t) => t.type === "expense" && !t.isRecurring).reduce((s, t) => s + t.amount, 0);
+    const fixedExpense = filtered.filter((t) => t.type === "expense" && t.isFixed).reduce((s, t) => s + t.amount, 0);
+    const variableExpense = filtered.filter((t) => t.type === "expense" && !t.isFixed).reduce((s, t) => s + t.amount, 0);
 
     const dayOfMonth = now.getDate();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
