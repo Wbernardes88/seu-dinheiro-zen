@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,13 @@ const getLocalDateStr = () => {
 
 const Lancamentos = () => {
   const { transactions, addTransaction, deleteTransaction, categories } = useFinance();
+  const { coupleMembers } = useAuth();
+
+  const getNickname = (userId?: string) => {
+    if (!userId) return "";
+    const member = coupleMembers.find((m) => m.userId === userId);
+    return member?.nickname || "";
+  };
 
   // Form state
   const [type, setType] = useState<"income" | "expense">("expense");
@@ -210,7 +218,10 @@ const Lancamentos = () => {
                       {t.description}
                       {t.isRecurring && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium shrink-0">🔄</span>}
                     </p>
-                    <p className="text-xs text-muted-foreground">{t.category} · {t.paymentMethod} · {t.date}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.category} · {t.paymentMethod} · {t.date}
+                      {getNickname(t.userId) && <span className="ml-1">· por {getNickname(t.userId)}</span>}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">

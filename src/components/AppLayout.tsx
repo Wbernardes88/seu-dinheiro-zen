@@ -3,6 +3,7 @@ import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon, Log
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo.png";
 
 const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Início" },
@@ -15,11 +16,12 @@ const navItems = [
 
 const AppLayout = () => {
   const { theme, toggleTheme } = useTheme();
-  const { user, signOut } = useAuth();
+  const { user, signOut, nickname, coupleMembers } = useAuth();
   const navigate = useNavigate();
 
-  const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Usuário";
-  const initials = displayName.slice(0, 2).toUpperCase();
+  const displayName = nickname || user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Usuário";
+  const initials = displayName.slice(0, 1).toUpperCase();
+  const isCoupleMode = coupleMembers.length >= 2;
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -27,9 +29,7 @@ const AppLayout = () => {
       <aside className="hidden md:flex flex-col w-60 border-r bg-card p-4 gap-1 fixed h-full">
         <div className="flex items-center justify-between px-3 py-4 mb-4">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">F</span>
-            </div>
+            <img src={logo} alt="FinançaJá" className="h-8 w-8 rounded-lg object-contain" />
             <span className="font-semibold text-lg text-foreground">FinançaJá</span>
           </div>
           <Button
@@ -42,6 +42,13 @@ const AppLayout = () => {
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </Button>
         </div>
+
+        {isCoupleMode && (
+          <div className="mx-3 mb-3 px-2 py-1 rounded-md bg-primary/10 text-primary text-[11px] font-medium text-center">
+            💑 Modo casal ativo
+          </div>
+        )}
+
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -103,10 +110,11 @@ const AppLayout = () => {
         {/* Mobile top bar */}
         <div className="md:hidden flex items-center justify-between px-4 py-3 border-b bg-card sticky top-0 z-40">
           <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xs">F</span>
-            </div>
+            <img src={logo} alt="FinançaJá" className="h-7 w-7 rounded-lg object-contain" />
             <span className="font-semibold text-foreground">FinançaJá</span>
+            {isCoupleMode && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">💑 Casal</span>
+            )}
           </div>
           <div className="flex items-center gap-1">
             <Button

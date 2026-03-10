@@ -2,14 +2,15 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-
 type AuthContextType = {
   user: User | null;
   session: Session | null;
   loading: boolean;
   coupleId: string | null;
   coupleLoading: boolean;
-  signUp: (email: string, password: string, displayName: string) => Promise<{ error: Error | null }>;
+  nickname: string;
+  coupleMembers: { userId: string; nickname: string; displayName: string }[];
+  signUp: (email: string, password: string, displayName: string, nickname: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
@@ -39,6 +40,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [coupleId, setCoupleId] = useState<string | null>(null);
   const [coupleLoading, setCoupleLoading] = useState(true);
+  const [nickname, setNickname] = useState("");
+  const [coupleMembers, setCoupleMembers] = useState<{ userId: string; nickname: string; displayName: string }[]>([]);
+
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("nickname, display_name")
+      .eq("id", userId)
+      .maybeSingle();
+    if (data) {
+      setNickname((data as any).nickname || (data as any).display_name || "");
+    }
+  };
+
+  const fetchCoupleMembers = async (cId: string) => {
+    const { data: members } = await supabase
+      .from("couple_members")
+      .select("user_id")
+      .eq("couple_id", cId);
+    if (!members || members.length === 0) return;
+
+    const userIds = members.map((m) => m.user_id);
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, display_name, nickname")
+      .in("id", userIds);
+
+    if (profiles) {
+      setCoupleMembers(
+        profiles.map((p) => ({
+          userId: p.id,
+          nickname: (p as any).nickname || p.display_name,
+          displayName: p.display_name,
+        }))
+      );
+    }
+  };
 
   const fetchCoupleId = async (userId?: string) => {
     const uid = userId || user?.id;
@@ -56,11 +94,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (data?.couple_id) {
       setCoupleId(data.couple_id);
+      await fetchCoupleMembers(data.couple_id);
       setCoupleLoading(false);
     } else {
-      // Auto-create a personal space
       const newCoupleId = await autoCreateCouple(uid);
       setCoupleId(newCoupleId);
+      if (newCoupleId) await fetchCoupleMembers(newCoupleId);
       setCoupleLoading(false);
     }
   };
@@ -71,10 +110,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       setLoading(false);
       if (session?.user) {
-        setTimeout(() => fetchCoupleId(session.user.id), 0);
+        setTimeout(() => {
+          fetchProfile(session.user.id);
+          fetchCoupleId(session.user.id);
+        }, 0);
       } else {
         setCoupleId(null);
         setCoupleLoading(false);
+        setNickname("");
+        setCoupleMembers([]);
       }
     });
 
@@ -83,6 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       setLoading(false);
       if (session?.user) {
+        fetchProfile(session.user.id);
         fetchCoupleId(session.user.id);
       } else {
         setCoupleLoading(false);
@@ -92,12 +137,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, displayName: string) => {
+  const signUp = async (email: string, password: string, displayName: string, nick: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: displayName },
+        data: { display_name: displayName, nickname: nick },
         emailRedirectTo: window.location.origin,
       },
     });
@@ -112,6 +157,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     await supabase.auth.signOut();
     setCoupleId(null);
+    setNickname("");
+    setCoupleMembers([]);
   };
 
   const resetPassword = async (email: string) => {
@@ -127,7 +174,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, coupleId, coupleLoading, signUp, signIn, signOut, resetPassword, refreshCouple }}
+      value={{ user, session, loading, coupleId, coupleLoading, nickname, coupleMembers, signUp, signIn, signOut, resetPassword, refreshCouple }}
     >
       {children}
     </AuthContext.Provider>
