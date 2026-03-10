@@ -39,7 +39,7 @@ const BalanceForecastCard = ({ month, year }: Props) => {
     const dailyAvgVariable = dayOfMonth > 0 ? variableExpense / dayOfMonth : 0;
     const projectedVariableExpense = variableExpense + dailyAvgVariable * daysLeft;
     const projectedExpense = fixedExpense + projectedVariableExpense;
-    const predicted = totalIncome - projectedExpense;
+    const predicted = Math.round((totalIncome - projectedExpense) * 100) / 100;
 
     // How much to reduce daily to end positive
     const dailyReduction = predicted < 0 && daysLeft > 0
