@@ -248,6 +248,23 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return true;
   }, [coupleId, transactions]);
 
+  const updateTransaction = useCallback(async (id: string, updates: Partial<Pick<Transaction, "isFixed">>) => {
+    const prev = transactions;
+    setTransactions((t) => t.map((tx) => tx.id === id ? { ...tx, ...updates } : tx));
+
+    const { error } = await supabase.from("transactions").update({
+      ...(updates.isFixed !== undefined && { is_fixed: updates.isFixed }),
+    }).eq("id", id);
+
+    if (error) {
+      console.error("updateTransaction error:", error);
+      setTransactions(prev);
+      toast.error("Erro ao atualizar lançamento.");
+      return false;
+    }
+    return true;
+  }, [transactions]);
+
   // ---- CATEGORIES ----
   const addCategory = useCallback(async (c: Omit<Category, "id">) => {
     if (!coupleId) return;
