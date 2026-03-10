@@ -9,6 +9,7 @@ type FinanceContextType = {
   transactions: Transaction[];
   addTransaction: (t: Omit<Transaction, "id">) => void;
   deleteTransaction: (id: string) => Promise<boolean>;
+  updateTransaction: (id: string, updates: Partial<Pick<Transaction, "isFixed">>) => Promise<boolean>;
 
   categories: Category[];
   addCategory: (c: Omit<Category, "id">) => void;
