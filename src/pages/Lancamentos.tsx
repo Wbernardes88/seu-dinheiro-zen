@@ -154,6 +154,16 @@ const Lancamentos = () => {
 
         <div className="flex items-center justify-between py-2 px-1">
           <div className="flex items-center gap-2">
+            <Pin className="h-4 w-4 text-muted-foreground" />
+            <Label className="text-xs font-medium text-foreground cursor-pointer" htmlFor="fixed-toggle">
+              Gasto fixo (aluguel, parcela, assinatura)
+            </Label>
+          </div>
+          <Switch id="fixed-toggle" checked={isFixed} onCheckedChange={setIsFixed} />
+        </div>
+
+        <div className="flex items-center justify-between py-2 px-1">
+          <div className="flex items-center gap-2">
             <RefreshCw className="h-4 w-4 text-muted-foreground" />
             <Label className="text-xs font-medium text-foreground cursor-pointer" htmlFor="recurring-toggle">
               Lançamento recorrente mensal
