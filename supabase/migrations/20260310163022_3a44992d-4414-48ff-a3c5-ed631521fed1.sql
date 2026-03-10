@@ -1,0 +1,1 @@
+CREATE POLICY "Members can update own transactions" ON public.transactions FOR UPDATE TO authenticated USING (couple_id = get_user_couple_id() AND user_id = auth.uid()) WITH CHECK (couple_id = get_user_couple_id() AND user_id = auth.uid());
