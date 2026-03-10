@@ -18,7 +18,7 @@ const levels = [
 const FinancialHealthCard = ({ month, year }: Props) => {
   const { transactions, budgetLimits, savingsGoals } = useFinance();
 
-  const { score, level } = useMemo(() => {
+  const { score, level, hasData } = useMemo(() => {
     const filtered = transactions.filter((t) => {
       const d = parseLocalDate(t.date);
       return d.getMonth() === month && d.getFullYear() === year;
@@ -27,6 +27,12 @@ const FinancialHealthCard = ({ month, year }: Props) => {
     const income = filtered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
     const expense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
 
+    // If there are no transactions at all, show "no data"
+    if (filtered.length === 0 && budgetLimits.length === 0 && savingsGoals.length === 0) {
+      const lvl = levels.find((l) => 0 >= l.min) || levels[levels.length - 1];
+      return { score: 0, level: lvl, hasData: false };
+    }
+
     // Factor 1: Balance ratio (0-30 pts)
     let balanceScore = 0;
     if (income > 0) {
@@ -34,8 +40,8 @@ const FinancialHealthCard = ({ month, year }: Props) => {
       balanceScore = Math.max(0, Math.min(30, ratio * 60));
     }
 
-    // Factor 2: Budget adherence (0-30 pts) — compute spent for the selected month, not current
-    let budgetScore = 30;
+    // Factor 2: Budget adherence (0-30 pts)
+    let budgetScore = 0;
     if (budgetLimits.length > 0) {
       const limitsForMonth = budgetLimits.map((bl) => {
         const spent = filtered
@@ -49,7 +55,7 @@ const FinancialHealthCard = ({ month, year }: Props) => {
     }
 
     // Factor 3: Savings goals progress (0-20 pts)
-    let savingsScore = 10;
+    let savingsScore = 0;
     if (savingsGoals.length > 0) {
       const avgProgress = savingsGoals.reduce((s, g) => s + Math.min(1, g.current / g.target), 0) / savingsGoals.length;
       savingsScore = avgProgress * 20;
@@ -61,7 +67,7 @@ const FinancialHealthCard = ({ month, year }: Props) => {
     const total = Math.round(Math.min(100, balanceScore + budgetScore + savingsScore + incomeScore));
     const lvl = levels.find((l) => total >= l.min) || levels[levels.length - 1];
 
-    return { score: total, level: lvl };
+    return { score: total, level: lvl, hasData: true };
   }, [transactions, budgetLimits, savingsGoals, month, year]);
 
   const circumference = 2 * Math.PI * 40;
