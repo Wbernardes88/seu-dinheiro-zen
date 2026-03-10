@@ -1,0 +1,1 @@
+ALTER PUBLICATION supabase_realtime ADD TABLE public.transactions, public.categories, public.budget_limits, public.savings_goals, public.challenge_weeks;
