@@ -27,9 +27,23 @@ const Desafio52Semanas = () => {
     setEditing(true);
   };
 
-  const handleEditConfirm = () => {
+  const handleEditConfirm = async () => {
     const val = parseFloat(editValue);
-    if (!isNaN(val) && val > 0) setCustomGoal(val);
+    if (!isNaN(val) && val >= 0) {
+      setCustomGoal(val);
+      // Reset all weeks when goal changes
+      if (coupleId) {
+        const { error } = await supabase.rpc("reset_challenge_weeks" as any, {
+          p_couple_id: coupleId,
+        });
+        if (error) {
+          console.error("reset error:", error);
+          toast.error("Erro ao resetar semanas.");
+        } else {
+          toast.success("Meta atualizada e semanas resetadas!");
+        }
+      }
+    }
     setEditing(false);
   };
 
