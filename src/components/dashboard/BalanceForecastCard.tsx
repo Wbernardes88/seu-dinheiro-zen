@@ -46,7 +46,7 @@ const BalanceForecastCard = ({ month, year }: Props) => {
       ? (Math.abs(predicted) / daysLeft)
       : 0;
 
-    return { predicted, daysLeft, dailyAvg: dailyAvgExpense, isProjection: true, dailyReduction };
+    return { predicted, daysLeft, dailyAvg: dailyAvgVariable, isProjection: true, dailyReduction, fixedExpense, variableExpense };
   }, [transactions, month, year]);
 
   const isNegative = forecast.predicted < 0;
