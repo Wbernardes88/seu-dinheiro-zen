@@ -106,6 +106,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
           current: Number(g.current),
           icon: g.icon,
           deadline: g.deadline || undefined,
+          responsible: (g as any).responsible || "both",
         })));
       }
 
