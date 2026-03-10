@@ -78,15 +78,15 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center mb-2">
-            <img src={logo} alt="FinançaJá" className="h-14 w-14 rounded-xl object-contain" />
+            <img src={logo} alt="FinançasJá" className="h-14 w-14 rounded-xl object-contain" />
           </div>
           <CardTitle className="text-2xl">
-            {mode === "login" && "Entrar no FinançaJá"}
+            {mode === "login" && "Entrar no FinançasJá"}
             {mode === "signup" && "Criar conta"}
             {mode === "forgot" && "Recuperar senha"}
           </CardTitle>
           <CardDescription>
-            {mode === "login" && "Controle financeiro para casais"}
+            {mode === "login" && "Organize suas finanças com simplicidade."}
             {mode === "signup" && "Comece a organizar suas finanças juntos"}
             {mode === "forgot" && "Enviaremos um link para redefinir sua senha"}
           </CardDescription>

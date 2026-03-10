@@ -29,8 +29,8 @@ const AppLayout = () => {
       <aside className="hidden md:flex flex-col w-60 border-r bg-card p-4 gap-1 fixed h-full">
         <div className="flex items-center justify-between px-3 py-4 mb-4">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="FinançaJá" className="h-8 w-8 rounded-lg object-contain" />
-            <span className="font-semibold text-lg text-foreground">FinançaJá</span>
+            <img src={logo} alt="FinançasJá" className="h-8 w-8 rounded-lg object-contain" />
+            <span className="font-semibold text-lg text-foreground">FinançasJá</span>
           </div>
           <Button
             variant="ghost"
@@ -110,8 +110,8 @@ const AppLayout = () => {
         {/* Mobile top bar */}
         <div className="md:hidden flex items-center justify-between px-4 py-3 border-b bg-card sticky top-0 z-40">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="FinançaJá" className="h-7 w-7 rounded-lg object-contain" />
-            <span className="font-semibold text-foreground">FinançaJá</span>
+            <img src={logo} alt="FinançasJá" className="h-7 w-7 rounded-lg object-contain" />
+            <span className="font-semibold text-foreground">FinançasJá</span>
             {isCoupleMode && (
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">💑 Casal</span>
             )}
