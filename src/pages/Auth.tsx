@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const Auth = () => {
   const { user, loading, signIn, signUp, resetPassword } = useAuth();
@@ -14,6 +15,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [nickname, setNickname] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -49,7 +51,12 @@ const Auth = () => {
         setSubmitting(false);
         return;
       }
-      const { error } = await signUp(email, password, displayName.trim());
+      if (!nickname.trim()) {
+        toast.error("Informe seu apelido");
+        setSubmitting(false);
+        return;
+      }
+      const { error } = await signUp(email, password, displayName.trim(), nickname.trim());
       setSubmitting(false);
       if (error) {
         toast.error(error.message);
@@ -71,9 +78,7 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center mb-2">
-            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xl">F</span>
-            </div>
+            <img src={logo} alt="FinançaJá" className="h-14 w-14 rounded-xl object-contain" />
           </div>
           <CardTitle className="text-2xl">
             {mode === "login" && "Entrar no FinançaJá"}
@@ -89,16 +94,29 @@ const Auth = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Seu nome</Label>
-                <Input
-                  id="name"
-                  placeholder="Como quer ser chamado(a)?"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  required
-                />
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nome completo</Label>
+                  <Input
+                    id="name"
+                    placeholder="Ex: João Silva"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="nickname">Apelido</Label>
+                  <Input
+                    id="nickname"
+                    placeholder="Ex: João"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">Será usado para identificar suas ações no app</p>
+                </div>
+              </>
             )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
