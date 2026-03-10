@@ -300,6 +300,7 @@ export type Database = {
           date: string
           description: string
           id: string
+          is_fixed: boolean
           is_recurring: boolean
           payment_method: string
           type: string
@@ -313,6 +314,7 @@ export type Database = {
           date?: string
           description?: string
           id?: string
+          is_fixed?: boolean
           is_recurring?: boolean
           payment_method?: string
           type: string
@@ -326,6 +328,7 @@ export type Database = {
           date?: string
           description?: string
           id?: string
+          is_fixed?: boolean
           is_recurring?: boolean
           payment_method?: string
           type?: string
