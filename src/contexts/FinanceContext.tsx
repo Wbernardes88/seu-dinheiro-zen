@@ -175,6 +175,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         payment_method: data.paymentMethod,
         amount: data.amount,
         is_recurring: data.isRecurring || false,
+        is_fixed: data.isFixed || false,
       });
       return result;
     };
