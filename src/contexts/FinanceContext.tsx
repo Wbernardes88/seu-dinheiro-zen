@@ -267,17 +267,32 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // ---- CHALLENGE 52 WEEKS ----
   const toggleWeek = useCallback(async (week: number) => {
     if (!coupleId) return;
-    const w = weeks.find((w) => w.week === week);
-    if (!w) return;
+
+    const currentWeek = weeks.find((w) => w.week === week);
+    if (!currentWeek) return;
+
+    const nextCompleted = !currentWeek.completed;
+    const nextCompletedAt = nextCompleted ? new Date().toISOString() : null;
+
+    // Optimistic update so UI reflects immediately (independent from realtime)
+    setWeeks((prev) =>
+      prev.map((w) => (w.week === week ? { ...w, completed: nextCompleted } : w))
+    );
+
     const { error } = await supabase
       .from("challenge_weeks")
       .update({
-        completed: !w.completed,
-        completed_at: !w.completed ? new Date().toISOString() : null,
+        completed: nextCompleted,
+        completed_at: nextCompletedAt,
       })
       .eq("couple_id", coupleId)
       .eq("week", week);
+
     if (error) {
+      // Rollback optimistic update if request fails
+      setWeeks((prev) =>
+        prev.map((w) => (w.week === week ? { ...w, completed: currentWeek.completed } : w))
+      );
       console.error("toggleWeek error:", error);
       toast.error("Erro ao atualizar semana. Tente novamente.");
     }
