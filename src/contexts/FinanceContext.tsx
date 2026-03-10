@@ -8,7 +8,7 @@ import type { Transaction, Category, BudgetLimit, SavingsGoal } from "@/lib/data
 type FinanceContextType = {
   transactions: Transaction[];
   addTransaction: (t: Omit<Transaction, "id">) => void;
-  deleteTransaction: (id: string) => void;
+  deleteTransaction: (id: string) => Promise<boolean>;
 
   categories: Category[];
   addCategory: (c: Omit<Category, "id">) => void;
