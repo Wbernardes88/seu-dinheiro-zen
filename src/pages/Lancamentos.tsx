@@ -35,6 +35,7 @@ const Lancamentos = () => {
   const [date, setDate] = useState(getLocalDateStr());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
+  const [isFixed, setIsFixed] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
 
   // Filter state
