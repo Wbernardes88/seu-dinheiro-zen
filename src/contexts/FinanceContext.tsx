@@ -162,7 +162,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!coupleId || !user) return;
 
     const insertOne = async (data: Omit<Transaction, "id">) => {
-      await supabase.from("transactions").insert({
+      const result = await supabase.from("transactions").insert({
         couple_id: coupleId,
         user_id: user.id,
         date: data.date,
@@ -173,6 +173,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         amount: data.amount,
         is_recurring: data.isRecurring || false,
       });
+      return result;
     };
 
     const { error } = await insertOne(t);
