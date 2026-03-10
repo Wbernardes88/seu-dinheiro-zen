@@ -272,21 +272,17 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!currentWeek) return;
 
     const nextCompleted = !currentWeek.completed;
-    const nextCompletedAt = nextCompleted ? new Date().toISOString() : null;
 
-    // Optimistic update so UI reflects immediately (independent from realtime)
+    // Optimistic update so UI reflects immediately
     setWeeks((prev) =>
       prev.map((w) => (w.week === week ? { ...w, completed: nextCompleted } : w))
     );
 
-    const { error } = await supabase
-      .from("challenge_weeks")
-      .update({
-        completed: nextCompleted,
-        completed_at: nextCompletedAt,
-      })
-      .eq("couple_id", coupleId)
-      .eq("week", week);
+    // Use SECURITY DEFINER function to bypass RLS issues in live environment
+    const { error } = await supabase.rpc("toggle_challenge_week" as any, {
+      p_couple_id: coupleId,
+      p_week: week,
+    });
 
     if (error) {
       // Rollback optimistic update if request fails
