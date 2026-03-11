@@ -15,6 +15,7 @@ import BalanceEvolutionChart from "@/components/dashboard/BalanceEvolutionChart"
 import BalanceForecastCard from "@/components/dashboard/BalanceForecastCard";
 import FinancialHealthCard from "@/components/dashboard/FinancialHealthCard";
 import DailyBudgetCard from "@/components/dashboard/DailyBudgetCard";
+import CreditCardWidget from "@/components/dashboard/CreditCardWidget";
 
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const shortMonthLabels = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
