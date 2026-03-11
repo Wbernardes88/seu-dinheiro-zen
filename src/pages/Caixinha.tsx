@@ -186,6 +186,7 @@ const viabilityIcons: Record<ViabilityLevel, string> = {
 const Caixinha = () => {
   const { savingsGoals, addSavingsGoal, updateSavingsGoal, deleteSavingsGoal, transactions } = useFinance();
   const { coupleMembers, user } = useAuth();
+  const { play } = useSounds();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<SavingsGoal | null>(null);
   const [name, setName] = useState("");
