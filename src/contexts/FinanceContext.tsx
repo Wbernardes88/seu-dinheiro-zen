@@ -25,6 +25,11 @@ type FinanceContextType = {
   updateSavingsGoal: (id: string, g: Partial<Omit<SavingsGoal, "id">>) => void;
   deleteSavingsGoal: (id: string) => void;
 
+  creditCards: CreditCard[];
+  addCreditCard: (c: Omit<CreditCard, "id">) => void;
+  updateCreditCard: (id: string, c: Partial<Omit<CreditCard, "id">>) => void;
+  deleteCreditCard: (id: string) => Promise<boolean>;
+
   challenge52Weeks: { week: number; amount: number; completed: boolean }[];
   toggleWeek: (week: number) => void;
 
