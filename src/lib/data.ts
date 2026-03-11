@@ -112,3 +112,47 @@ export function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split("-").map(Number);
   return new Date(year, month - 1, day);
 }
+
+/**
+ * Returns the invoice month (0-based) and year for a credit card
+ * based on today's date and the card's closing day.
+ *
+ * Logic:
+ * - If today <= closingDay → current invoice = current month
+ * - If today > closingDay → current invoice = next month
+ *
+ * Example: closingDay=1, today=March 11 → invoice month = April (3)
+ * Example: closingDay=15, today=March 11 → invoice month = March (2)
+ */
+export function getCurrentInvoicePeriod(closingDay: number, refDate?: Date): { month: number; year: number } {
+  const d = refDate || new Date();
+  const currentDay = d.getDate();
+  let month = d.getMonth();
+  let year = d.getFullYear();
+
+  if (currentDay > closingDay) {
+    // Past closing → current purchases go to NEXT month's invoice
+    month += 1;
+    if (month > 11) {
+      month = 0;
+      year += 1;
+    }
+  }
+
+  return { month, year };
+}
+
+/**
+ * Builds a safe invoice reference date string (YYYY-MM-01)
+ * using day=1 to avoid month overflow issues (e.g. April 31 → May 1).
+ */
+export function getInvoiceDateStr(year: number, month: number): string {
+  return `${year}-${String(month + 1).padStart(2, '0')}-01`;
+}
+
+/**
+ * Builds a safe invoice reference date string from 1-based month.
+ */
+export function getInvoiceDateStr1Based(year: number, month1Based: number): string {
+  return `${year}-${String(month1Based).padStart(2, '0')}-01`;
+}
