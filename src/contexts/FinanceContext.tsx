@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { parseLocalDate } from "@/lib/data";
 import { useAuth } from "./AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import type { Transaction, Category, BudgetLimit, SavingsGoal } from "@/lib/data";
+import type { Transaction, Category, BudgetLimit, SavingsGoal, CreditCard } from "@/lib/data";
 
 type FinanceContextType = {
   transactions: Transaction[];
