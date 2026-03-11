@@ -29,7 +29,7 @@ type Props = {
 };
 
 const InvoiceImportDialog = ({ open, onOpenChange, card }: Props) => {
-  const { categories, addTransaction } = useFinance();
+  const { categories } = useFinance();
   const { user, coupleId } = useAuth();
   const { play } = useSounds();
   const fileRef = useRef<HTMLInputElement>(null);
