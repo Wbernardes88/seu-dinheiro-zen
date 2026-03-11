@@ -134,13 +134,27 @@ const Cartoes = () => {
     });
   };
 
-  // Current month spending per card (for limit usage)
-  const getCardMonthSpending = (cardId: string) => {
+  // Current invoice period spending per card (based on closing day, not calendar month)
+  const getCardInvoiceSpending = (card: CreditCard) => {
+    const closingDay = card.closingDay;
+    const currentDay = now.getDate();
+    
+    let periodStart: Date;
+    let periodEnd: Date;
+    
+    if (currentDay > closingDay) {
+      periodStart = new Date(now.getFullYear(), now.getMonth(), closingDay + 1);
+      periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, closingDay);
+    } else {
+      periodStart = new Date(now.getFullYear(), now.getMonth() - 1, closingDay + 1);
+      periodEnd = new Date(now.getFullYear(), now.getMonth(), closingDay);
+    }
+
     return transactions
       .filter((t) => {
-        if (t.creditCardId !== cardId || t.type !== "expense") return false;
+        if (t.creditCardId !== card.id || t.type !== "expense") return false;
         const d = parseLocalDate(t.date);
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        return d >= periodStart && d <= periodEnd;
       })
       .reduce((sum, t) => sum + t.amount, 0);
   };
@@ -176,7 +190,7 @@ const Cartoes = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {creditCards.map((card) => {
-            const spent = getCardMonthSpending(card.id);
+            const spent = getCardInvoiceSpending(card);
             const usagePct = card.creditLimit > 0 ? Math.min((spent / card.creditLimit) * 100, 100) : 0;
             const purchaseInfo = getBestPurchaseInfo(card.closingDay);
 

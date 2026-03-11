@@ -11,11 +11,31 @@ const CreditCardWidget = () => {
 
   const cardData = useMemo(() => {
     return creditCards.map((card) => {
+      // Calculate invoice period based on closing day
+      const closingDay = card.closingDay;
+      const currentDay = now.getDate();
+      
+      // If we're past closing day, current invoice period is: closingDay of this month to closingDay of next month
+      // If we're before/on closing day, current invoice period is: closingDay of last month to closingDay of this month
+      let periodStart: Date;
+      let periodEnd: Date;
+      
+      if (currentDay > closingDay) {
+        // Current invoice: from closingDay+1 of this month to closingDay of next month
+        periodStart = new Date(now.getFullYear(), now.getMonth(), closingDay + 1);
+        const nextMonth = now.getMonth() + 1;
+        periodEnd = new Date(now.getFullYear(), nextMonth, closingDay);
+      } else {
+        // Current invoice: from closingDay+1 of last month to closingDay of this month
+        periodStart = new Date(now.getFullYear(), now.getMonth() - 1, closingDay + 1);
+        periodEnd = new Date(now.getFullYear(), now.getMonth(), closingDay);
+      }
+
       const spent = transactions
         .filter((t) => {
           if (t.creditCardId !== card.id || t.type !== "expense") return false;
           const d = parseLocalDate(t.date);
-          return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+          return d >= periodStart && d <= periodEnd;
         })
         .reduce((sum, t) => sum + t.amount, 0);
 
@@ -24,7 +44,7 @@ const CreditCardWidget = () => {
 
       return { ...card, spent, usagePct, available };
     });
-  }, [creditCards, transactions, now.getMonth(), now.getFullYear()]);
+  }, [creditCards, transactions, now.getMonth(), now.getFullYear(), now.getDate()]);
 
   if (creditCards.length === 0) return null;
 
