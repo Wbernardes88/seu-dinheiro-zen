@@ -60,14 +60,14 @@ const Dashboard = () => {
   // Pending credit card debt for the period
   const pendingCreditCard = creditCardFiltered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
 
-  // Previous month data for comparison
+  // Previous month data for comparison (also excluding credit card)
   const prevMonthData = useMemo(() => {
     let pm = month - 1;
     let py = year;
     if (pm < 0) { pm = 11; py--; }
     const prev = transactions.filter((t) => {
       const d = parseLocalDate(t.date);
-      return d.getMonth() === pm && d.getFullYear() === py;
+      return d.getMonth() === pm && d.getFullYear() === py && !t.creditCardId;
     });
     const inc = prev.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
     const exp = prev.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
