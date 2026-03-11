@@ -136,6 +136,14 @@ const AppLayout = () => {
               variant="ghost"
               size="icon"
               className="h-8 w-8 rounded-full"
+              onClick={() => { toggleSound(); play("tap"); }}
+            >
+              {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full"
               onClick={toggleTheme}
             >
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
