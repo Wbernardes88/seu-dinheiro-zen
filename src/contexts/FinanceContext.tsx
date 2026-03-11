@@ -63,12 +63,13 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const fetchAll = async () => {
       setLoading(true);
-      const [txRes, catRes, blRes, sgRes, cwRes] = await Promise.all([
+      const [txRes, catRes, blRes, sgRes, cwRes, ccRes] = await Promise.all([
         supabase.from("transactions").select("*").eq("couple_id", coupleId).order("date", { ascending: false }),
         supabase.from("categories").select("*").eq("couple_id", coupleId),
         supabase.from("budget_limits").select("*").eq("couple_id", coupleId),
         supabase.from("savings_goals").select("*").eq("couple_id", coupleId),
         supabase.from("challenge_weeks").select("*").eq("couple_id", coupleId).order("week"),
+        supabase.from("credit_cards").select("*").eq("couple_id", coupleId),
       ]);
 
       if (txRes.data) {
