@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,19 +9,27 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { SoundProvider } from "./contexts/SoundContext";
 import AppLayout from "./components/AppLayout";
-import Dashboard from "./pages/Dashboard";
-import Lancamentos from "./pages/Lancamentos";
-import Categorias from "./pages/Categorias";
-import LimiteGastos from "./pages/LimiteGastos";
-import Caixinha from "./pages/Caixinha";
-import Desafio52Semanas from "./pages/Desafio52Semanas";
-import Cartoes from "./pages/Cartoes";
-import Auth from "./pages/Auth";
-import Documentacao from "./pages/Documentacao";
-import ResetPassword from "./pages/ResetPassword";
-import CoupleManage from "./pages/CoupleManage";
-import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
+
+// Lazy-loaded pages
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Lancamentos = lazy(() => import("./pages/Lancamentos"));
+const Categorias = lazy(() => import("./pages/Categorias"));
+const LimiteGastos = lazy(() => import("./pages/LimiteGastos"));
+const Caixinha = lazy(() => import("./pages/Caixinha"));
+const Desafio52Semanas = lazy(() => import("./pages/Desafio52Semanas"));
+const Cartoes = lazy(() => import("./pages/Cartoes"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Documentacao = lazy(() => import("./pages/Documentacao"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const CoupleManage = lazy(() => import("./pages/CoupleManage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+const PageLoader = () => (
+  <div className="min-h-[50vh] flex items-center justify-center">
+    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -49,30 +58,32 @@ const App = () => (
             <Toaster />
             <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <FinanceProvider>
-                      <AppLayout />
-                    </FinanceProvider>
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/lancamentos" element={<Lancamentos />} />
-                <Route path="/categorias" element={<Categorias />} />
-                <Route path="/limites" element={<LimiteGastos />} />
-                <Route path="/caixinha" element={<Caixinha />} />
-                <Route path="/desafio" element={<Desafio52Semanas />} />
-                <Route path="/cartoes" element={<Cartoes />} />
-                <Route path="/casal" element={<CoupleManage />} />
-                <Route path="/documentacao" element={<Documentacao />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <FinanceProvider>
+                        <AppLayout />
+                      </FinanceProvider>
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/lancamentos" element={<Lancamentos />} />
+                  <Route path="/categorias" element={<Categorias />} />
+                  <Route path="/limites" element={<LimiteGastos />} />
+                  <Route path="/caixinha" element={<Caixinha />} />
+                  <Route path="/desafio" element={<Desafio52Semanas />} />
+                  <Route path="/cartoes" element={<Cartoes />} />
+                  <Route path="/casal" element={<CoupleManage />} />
+                  <Route path="/documentacao" element={<Documentacao />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
           </AuthProvider>
         </TooltipProvider>
