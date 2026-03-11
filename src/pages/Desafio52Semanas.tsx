@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSounds } from "@/contexts/SoundContext";
 import { formatCurrency } from "@/lib/data";
 import { CheckCircle2, Circle, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";

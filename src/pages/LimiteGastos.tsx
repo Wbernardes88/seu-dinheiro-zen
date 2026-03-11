@@ -103,7 +103,7 @@ const LimiteGastos = () => {
                     <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100" onClick={() => openEdit(item)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 text-expense" onClick={() => { deleteBudgetLimit(item.categoryId); toast.success("Limite removido!"); }}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 text-expense" onClick={() => { deleteBudgetLimit(item.categoryId); play("delete"); toast.success("Limite removido!"); }}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>

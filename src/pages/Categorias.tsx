@@ -58,6 +58,7 @@ const Categorias = () => {
   const handleDelete = (id: string) => {
     deleteCategory(id);
     toast.success("Categoria removida!");
+    play("delete");
   };
 
   const emojiOptions = ["💰", "💻", "📈", "📦", "🍔", "🚗", "🏠", "💊", "📚", "🎮", "👕", "📱", "🎬", "🐾", "💇", "🎁", "⚽", "✈️", "🔧", "📁"];

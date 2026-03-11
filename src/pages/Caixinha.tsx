@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSounds } from "@/contexts/SoundContext";
 import { formatCurrency, parseLocalDate } from "@/lib/data";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
