@@ -32,6 +32,8 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   card: CreditCard;
+  selectedMonth: number; // 0-based month selected by user
+  selectedYear: number;
   onImportComplete?: (month0based: number, year: number) => void;
 };
 
