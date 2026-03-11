@@ -32,10 +32,12 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   card: CreditCard;
+  selectedMonth: number; // 0-based month selected by user
+  selectedYear: number;
   onImportComplete?: (month0based: number, year: number) => void;
 };
 
-const InvoiceImportDialog = ({ open, onOpenChange, card, onImportComplete }: Props) => {
+const InvoiceImportDialog = ({ open, onOpenChange, card, selectedMonth, selectedYear, onImportComplete }: Props) => {
   const { categories, refreshTransactions } = useFinance();
   const { user, coupleId } = useAuth();
   const { play } = useSounds();
@@ -94,13 +96,13 @@ const InvoiceImportDialog = ({ open, onOpenChange, card, onImportComplete }: Pro
         throw new Error("Nenhum lançamento encontrado na fatura");
       }
 
-      // Capture invoice month/year from AI response
-      const invYear = data.invoice_year || new Date().getFullYear();
-      const invMonth = data.invoice_month || (new Date().getMonth() + 1); // 1-based
-      setInvoiceMeta({ invoice_year: invYear, invoice_month: invMonth });
+      // Use the month selected by the user, not the AI-detected month
+      const invYear = selectedYear;
+      const invMonth1Based = selectedMonth + 1; // convert 0-based to 1-based
+      setInvoiceMeta({ invoice_year: invYear, invoice_month: invMonth1Based });
 
       // Use day=1 to avoid month overflow (e.g. April 31 → May 1)
-      const invoiceDate = getInvoiceDateStr1Based(invYear, invMonth);
+      const invoiceDate = getInvoiceDateStr1Based(invYear, invMonth1Based);
 
       const mapped: ExtractedTransaction[] = data.transactions.map((t: any) => ({
         date: invoiceDate,
