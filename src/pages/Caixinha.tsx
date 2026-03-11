@@ -103,8 +103,86 @@ function getSmartMessages(goal: SavingsGoal): { text: string; color: string }[] 
   return messages;
 }
 
+// Calculate monthly savings capacity from transactions
+function getSavingsCapacity(
+  transactions: Transaction[],
+  responsible: string | undefined,
+  coupleMembers: { userId: string; nickname: string; displayName: string }[]
+): number | null {
+  if (transactions.length === 0) return null;
+
+  const now = new Date();
+  // Use last 3 months of data for a more stable average
+  const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+
+  let filtered = transactions.filter((t) => {
+    const d = parseLocalDate(t.date);
+    return d >= threeMonthsAgo && d <= now;
+  });
+
+  // Filter by responsible person
+  if (responsible && responsible !== "both") {
+    filtered = filtered.filter((t) => t.userId === responsible);
+  }
+
+  const income = filtered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  const expense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+
+  // Calculate months in range
+  const monthsInRange = Math.max(
+    (now.getFullYear() - threeMonthsAgo.getFullYear()) * 12 + (now.getMonth() - threeMonthsAgo.getMonth()),
+    1
+  );
+
+  const monthlyCapacity = Math.round((income - expense) / monthsInRange);
+  return monthlyCapacity;
+}
+
+type ViabilityLevel = "viable" | "attention" | "aggressive";
+
+function getViability(capacity: number | null, perMonth: number | null): { level: ViabilityLevel; label: string; message: string } {
+  if (capacity === null || perMonth === null || perMonth <= 0) {
+    return { level: "viable", label: "Sem dados suficientes", message: "Adicione lançamentos para análise de viabilidade." };
+  }
+
+  const ratio = capacity / perMonth;
+
+  if (ratio >= 1) {
+    return {
+      level: "viable",
+      label: "Meta viável",
+      message: "Você tem capacidade suficiente para atingir essa meta.",
+    };
+  } else if (ratio >= 0.6) {
+    const gap = Math.round(perMonth - capacity);
+    return {
+      level: "attention",
+      label: "Ajuste necessário",
+      message: `Faltam aproximadamente R$ ${gap}/mês para atingir essa meta no prazo.`,
+    };
+  } else {
+    return {
+      level: "aggressive",
+      label: "Meta agressiva",
+      message: "Meta agressiva para o prazo atual. Considere estender o prazo ou aumentar a renda.",
+    };
+  }
+}
+
+const viabilityColors: Record<ViabilityLevel, string> = {
+  viable: "bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30",
+  attention: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-500/30",
+  aggressive: "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30",
+};
+
+const viabilityIcons: Record<ViabilityLevel, string> = {
+  viable: "🟢",
+  attention: "🟡",
+  aggressive: "🔴",
+};
+
 const Caixinha = () => {
-  const { savingsGoals, addSavingsGoal, updateSavingsGoal, deleteSavingsGoal } = useFinance();
+  const { savingsGoals, addSavingsGoal, updateSavingsGoal, deleteSavingsGoal, transactions } = useFinance();
   const { coupleMembers, user } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<SavingsGoal | null>(null);
