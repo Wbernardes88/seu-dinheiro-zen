@@ -142,9 +142,14 @@ const InvoiceImportDialog = ({ open, onOpenChange, card }: Props) => {
         return;
       }
 
-      // Insert directly to avoid addTransaction's installment generation logic
-      // Invoice already lists each installment individually
+      // Insert transactions using invoice month date
+      // For installments, project remaining parcels to future months
       for (const t of selected) {
+        const groupId = (t.total_installments && t.total_installments > 1 && t.installment_number)
+          ? crypto.randomUUID()
+          : null;
+
+        // Insert the current installment (from the imported invoice)
         const { error } = await supabase.from("transactions").insert({
           couple_id: coupleId,
           user_id: user!.id,
@@ -155,16 +160,48 @@ const InvoiceImportDialog = ({ open, onOpenChange, card }: Props) => {
           payment_method: "Cartão crédito",
           amount: t.amount,
           is_recurring: false,
-          is_fixed: false,
+          is_fixed: t.total_installments && t.total_installments > 1,
           credit_card_id: card.id,
           installment_number: t.installment_number || null,
           total_installments: t.total_installments || null,
-          installment_group_id: null,
+          installment_group_id: groupId,
         });
 
         if (error) {
           console.error("Insert error:", error);
           throw new Error("Erro ao salvar lançamento");
+        }
+
+        // Project future installments if applicable
+        if (t.total_installments && t.installment_number && t.total_installments > t.installment_number && invoiceMeta) {
+          const remaining = t.total_installments - t.installment_number;
+          for (let i = 1; i <= remaining; i++) {
+            const futureInstallment = t.installment_number + i;
+            // Calculate future month date
+            const futureDate = new Date(invoiceMeta.invoice_year, invoiceMeta.invoice_month - 1 + i, card.closingDay);
+            const futureDateStr = `${futureDate.getFullYear()}-${String(futureDate.getMonth() + 1).padStart(2, '0')}-${String(futureDate.getDate()).padStart(2, '0')}`;
+
+            const { error: futureError } = await supabase.from("transactions").insert({
+              couple_id: coupleId,
+              user_id: user!.id,
+              date: futureDateStr,
+              type: "expense",
+              category: t.category,
+              description: t.description,
+              payment_method: "Cartão crédito",
+              amount: t.amount,
+              is_recurring: false,
+              is_fixed: true,
+              credit_card_id: card.id,
+              installment_number: futureInstallment,
+              total_installments: t.total_installments,
+              installment_group_id: groupId,
+            });
+
+            if (futureError) {
+              console.error("Future installment error:", futureError);
+            }
+          }
         }
       }
 
