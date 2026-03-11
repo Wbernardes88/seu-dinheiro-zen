@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, CreditCard as CreditCardIcon, Calendar, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Pencil, Trash2, CreditCard as CreditCardIcon, Calendar, AlertTriangle, ChevronLeft, ChevronRight, FileUp } from "lucide-react";
 import { toast } from "sonner";
+import InvoiceImportDialog from "@/components/cartoes/InvoiceImportDialog";
 
 const brands = ["Visa", "Mastercard", "Elo", "Amex", "Hipercard", "Outro"];
 const cardColors = [
@@ -74,7 +75,7 @@ const Cartoes = () => {
   const [invoiceMonth, setInvoiceMonth] = useState(now.getMonth());
   const [invoiceYear, setInvoiceYear] = useState(now.getFullYear());
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
-
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const openNew = () => {
     setEditing(null);
     setName("");
@@ -250,6 +251,16 @@ const Cartoes = () => {
               Fatura — {activeCard.name}
             </h3>
             <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs"
+                onClick={() => setImportDialogOpen(true)}
+              >
+                <FileUp className="h-3.5 w-3.5" />
+                Importar PDF
+              </Button>
+              <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={prevMonth}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -259,6 +270,7 @@ const Cartoes = () => {
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={nextMonth}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
+            </div>
             </div>
           </div>
 
@@ -367,6 +379,15 @@ const Cartoes = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Invoice Import Dialog */}
+      {activeCard && (
+        <InvoiceImportDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          card={activeCard}
+        />
+      )}
     </div>
   );
 };
