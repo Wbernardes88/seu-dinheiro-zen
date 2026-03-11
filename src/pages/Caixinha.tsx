@@ -207,7 +207,7 @@ const Caixinha = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {savingsGoals.map((goal) => {
             const calc = getGoalCalculations(goal);
-            const motivation = getMotivationalMessage(goal);
+            const smartMsgs = getSmartMessages(goal);
             return (
               <div key={goal.id} className="card-glass p-4 space-y-3 group">
                 {/* Header */}
@@ -225,15 +225,27 @@ const Caixinha = () => {
                         </Button>
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {formatCurrency(goal.current)} de {formatCurrency(goal.target)}
-                      {goal.deadline && ` · até ${new Date(goal.deadline + "T00:00:00").toLocaleDateString("pt-BR")}`}
-                    </p>
                   </div>
-                  <span className="text-xs font-bold text-primary">{calc.pct.toFixed(0)}%</span>
                 </div>
 
-                <Progress value={calc.pct} className="h-2" />
+                {/* Primary highlight: monthly target */}
+                {calc.perMonth !== null && calc.pct < 100 && (
+                  <div className="bg-primary/10 rounded-lg px-3 py-2 text-center">
+                    <p className="text-xs text-muted-foreground">Guardar por mês</p>
+                    <p className="text-lg font-bold text-primary">{formatCurrency(Math.round(calc.perMonth))}</p>
+                  </div>
+                )}
+
+                {/* Progress bar with label */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">
+                      {formatCurrency(goal.current)} de {formatCurrency(goal.target)}
+                    </span>
+                    <span className="font-semibold text-primary">{Math.round(calc.pct)}% da meta concluída</span>
+                  </div>
+                  <Progress value={calc.pct} className="h-2" />
+                </div>
 
                 {/* Responsible */}
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -241,36 +253,40 @@ const Caixinha = () => {
                   <span>Responsável: <span className="font-medium text-foreground">{getResponsibleLabel(goal.responsible)}</span></span>
                 </div>
 
-                {/* Calculations */}
+                {/* Secondary info */}
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Target className="h-3 w-3 shrink-0" />
-                    <span>Faltam: <span className="font-medium text-foreground">{formatCurrency(calc.remaining)}</span></span>
+                    <span>Faltam: <span className="font-medium text-foreground">{formatCurrency(Math.round(calc.remaining))}</span></span>
                   </div>
-                  {calc.perMonth !== null && (
+                  {calc.monthsLeft !== null && calc.monthsLeft > 0 && (
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Calendar className="h-3 w-3 shrink-0" />
-                      <span>{formatCurrency(calc.perMonth)}/mês</span>
+                      <span>{calc.monthsLeft} {calc.monthsLeft === 1 ? "mês restante" : "meses restantes"}</span>
                     </div>
                   )}
                   {calc.perWeek !== null && (
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <TrendingUp className="h-3 w-3 shrink-0" />
-                      <span>{formatCurrency(calc.perWeek)}/sem</span>
+                      <span>{formatCurrency(Math.round(calc.perWeek))}/semana</span>
                     </div>
                   )}
-                  {calc.monthsLeft !== null && calc.monthsLeft > 0 && (
+                  {goal.deadline && (
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Calendar className="h-3 w-3 shrink-0" />
-                      <span>{calc.monthsLeft} {calc.monthsLeft === 1 ? "mês" : "meses"} restante{calc.monthsLeft > 1 ? "s" : ""}</span>
+                      <span>Prazo: {new Date(goal.deadline + "T00:00:00").toLocaleDateString("pt-BR")}</span>
                     </div>
                   )}
                 </div>
 
-                {/* Motivational message */}
-                <p className={`text-xs ${motivation.color} italic`}>
-                  {motivation.text}
-                </p>
+                {/* Smart messages */}
+                <div className="space-y-1 border-t border-border/50 pt-2">
+                  {smartMsgs.map((msg, i) => (
+                    <p key={i} className={`text-xs ${msg.color} italic`}>
+                      {msg.text}
+                    </p>
+                  ))}
+                </div>
               </div>
             );
           })}
