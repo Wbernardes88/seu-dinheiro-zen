@@ -58,8 +58,9 @@ function getBestPurchaseInfo(closingDay: number) {
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
 const Cartoes = () => {
-  const { creditCards, addCreditCard, updateCreditCard, deleteCreditCard, transactions } = useFinance();
+  const { creditCards, addCreditCard, updateCreditCard, deleteCreditCard, transactions, deleteTransaction } = useFinance();
   const { play } = useSounds();
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CreditCard | null>(null);
