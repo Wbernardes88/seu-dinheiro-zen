@@ -42,6 +42,7 @@ const LimiteGastos = () => {
     const cat = expCats.find((c) => c.id === editingCatId);
     setBudgetLimit(editingCatId, cat?.name || editingCatName, parseFloat(budgetValue));
     toast.success("Limite salvo!");
+    play("success");
     setDialogOpen(false);
   };
 
