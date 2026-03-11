@@ -318,11 +318,6 @@ const Caixinha = () => {
                         </Button>
                       </div>
                     </div>
-                    {calc.perMonth !== null && (
-                      <Badge className={`text-[10px] px-1.5 py-0 h-5 font-medium mt-1 ${viabilityColors[viability.level]}`}>
-                        {viabilityIcons[viability.level]} {viability.label}
-                      </Badge>
-                    )}
                   </div>
                 </div>
 
@@ -374,17 +369,6 @@ const Caixinha = () => {
                   </div>
                 </div>
 
-                {/* Registrar aporte button */}
-                {calc.pct < 100 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs h-8"
-                    onClick={() => openEdit(goal)}
-                  >
-                    Registrar aporte
-                  </Button>
-                )}
 
                 {/* Advanced info (collapsible) */}
                 {hasAdvancedInfo && calc.pct < 100 && (
