@@ -366,6 +366,41 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await supabase.from("savings_goals").delete().eq("id", id);
   }, []);
 
+  // ---- CREDIT CARDS ----
+  const addCreditCard = useCallback(async (c: Omit<CreditCard, "id">) => {
+    if (!coupleId) return;
+    await supabase.from("credit_cards").insert({
+      couple_id: coupleId,
+      name: c.name,
+      brand: c.brand,
+      color: c.color,
+      credit_limit: c.creditLimit,
+      closing_day: c.closingDay,
+      due_day: c.dueDay,
+    });
+  }, [coupleId]);
+
+  const updateCreditCard = useCallback(async (id: string, c: Partial<Omit<CreditCard, "id">>) => {
+    await supabase.from("credit_cards").update({
+      ...(c.name !== undefined && { name: c.name }),
+      ...(c.brand !== undefined && { brand: c.brand }),
+      ...(c.color !== undefined && { color: c.color }),
+      ...(c.creditLimit !== undefined && { credit_limit: c.creditLimit }),
+      ...(c.closingDay !== undefined && { closing_day: c.closingDay }),
+      ...(c.dueDay !== undefined && { due_day: c.dueDay }),
+    }).eq("id", id);
+  }, []);
+
+  const deleteCreditCard = useCallback(async (id: string) => {
+    const { error } = await supabase.from("credit_cards").delete().eq("id", id);
+    if (error) {
+      console.error("deleteCreditCard error:", error);
+      toast.error("Erro ao remover cartão.");
+      return false;
+    }
+    return true;
+  }, []);
+
   // ---- CHALLENGE 52 WEEKS ----
   const toggleWeek = useCallback(async (week: number) => {
     if (!coupleId) return;
