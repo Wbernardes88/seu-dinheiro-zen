@@ -78,7 +78,7 @@ const CreditCardWidget = () => {
               />
             </div>
             <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-              <span>{Math.round(card.usagePct)}% usado</span>
+              <span>Fatura: {Math.round(card.usagePct)}%</span>
               <span className="flex items-center gap-1">
                 <Calendar className="h-2.5 w-2.5" />
                 Vence dia {card.dueDay}
