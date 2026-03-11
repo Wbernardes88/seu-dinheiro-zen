@@ -1,16 +1,17 @@
 import { useState, useMemo } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { formatCurrency } from "@/lib/data";
+import { formatCurrency, parseLocalDate } from "@/lib/data";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, TrendingUp, Calendar, Target, Users } from "lucide-react";
+import { Plus, Pencil, Trash2, TrendingUp, Calendar, Target, Users, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import type { SavingsGoal } from "@/lib/data";
+import type { SavingsGoal, Transaction } from "@/lib/data";
 
 function getGoalCalculations(goal: SavingsGoal) {
   const remaining = Math.max(goal.target - goal.current, 0);
