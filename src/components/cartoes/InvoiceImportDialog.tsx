@@ -29,8 +29,8 @@ type Props = {
 };
 
 const InvoiceImportDialog = ({ open, onOpenChange, card }: Props) => {
-  const { categories, addTransaction } = useFinance();
-  const { user } = useAuth();
+  const { categories } = useFinance();
+  const { user, coupleId } = useAuth();
   const { play } = useSounds();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -119,21 +119,36 @@ const InvoiceImportDialog = ({ open, onOpenChange, card }: Props) => {
     setStep("saving");
 
     try {
+      if (!coupleId || !user) {
+        toast.error("Erro de autenticação");
+        setStep("preview");
+        return;
+      }
+
+      // Insert directly to avoid addTransaction's installment generation logic
+      // Invoice already lists each installment individually
       for (const t of selected) {
-        await addTransaction({
+        const { error } = await supabase.from("transactions").insert({
+          couple_id: coupleId,
+          user_id: user!.id,
           date: t.date,
           type: "expense",
           category: t.category,
           description: t.description,
-          paymentMethod: "Cartão crédito",
+          payment_method: "Cartão crédito",
           amount: t.amount,
-          isRecurring: false,
-          isFixed: false,
-          creditCardId: card.id,
-          userId: user?.id,
-          installmentNumber: t.installment_number,
-          totalInstallments: t.total_installments,
+          is_recurring: false,
+          is_fixed: false,
+          credit_card_id: card.id,
+          installment_number: t.installment_number || null,
+          total_installments: t.total_installments || null,
+          installment_group_id: null,
         });
+
+        if (error) {
+          console.error("Insert error:", error);
+          throw new Error("Erro ao salvar lançamento");
+        }
       }
 
       setStep("done");
