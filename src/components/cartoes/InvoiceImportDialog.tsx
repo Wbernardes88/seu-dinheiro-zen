@@ -119,16 +119,17 @@ const InvoiceImportDialog = ({ open, onOpenChange, card }: Props) => {
     setStep("saving");
 
     try {
-      const { coupleId } = await import("@/contexts/AuthContext").then(m => {
-        // We already have user from useAuth above
-        return { coupleId: null };
-      });
+      if (!coupleId || !user) {
+        toast.error("Erro de autenticação");
+        setStep("preview");
+        return;
+      }
 
       // Insert directly to avoid addTransaction's installment generation logic
       // Invoice already lists each installment individually
       for (const t of selected) {
         const { error } = await supabase.from("transactions").insert({
-          couple_id: (await supabase.rpc("get_user_couple_id")).data!,
+          couple_id: coupleId,
           user_id: user!.id,
           date: t.date,
           type: "expense",
