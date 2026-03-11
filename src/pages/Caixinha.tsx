@@ -384,10 +384,14 @@ const Caixinha = () => {
 
                 {/* Per-person suggestion for "both" */}
                 {goal.responsible === "both" && calc.perMonth !== null && calc.perMonth > 0 && calc.pct < 100 && (
-                  <div className="text-xs text-muted-foreground px-2.5 py-1.5 rounded-md bg-secondary/50">
-                    👥 Cada pessoa precisaria guardar cerca de <span className="font-medium text-foreground">R$ {Math.round(calc.perMonth / 2)}/mês</span>
+                  <div className="text-xs px-2.5 py-2 rounded-md bg-secondary/50 space-y-1">
+                    <p className="text-muted-foreground">
+                      👥 Contribuição por pessoa: <span className="font-medium text-foreground">R$ {Math.round(calc.perMonth / 2)}/mês</span>
+                    </p>
                     {capacity !== null && capacity > 0 && (
-                      <> — capacidade individual estimada: <span className="font-medium text-foreground">R$ {Math.round(capacity / 2)}/mês</span></>
+                      <p className="text-muted-foreground">
+                        💰 Capacidade individual: <span className="font-medium text-foreground">R$ {Math.round(capacity / 2)}/mês</span>
+                      </p>
                     )}
                   </div>
                 )}
