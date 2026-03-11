@@ -56,6 +56,7 @@ const AppLayout = () => {
               {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
             </Button>
           </div>
+        </div>
 
         {isCoupleMode && (
           <div className="mx-3 mb-3 px-2 py-1 rounded-md bg-primary/10 text-primary text-[11px] font-medium text-center">
