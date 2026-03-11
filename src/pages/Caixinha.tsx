@@ -387,14 +387,6 @@ const Caixinha = () => {
                         </div>
                       )}
 
-                      {/* Weekly */}
-                      {calc.perWeek !== null && (
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <TrendingUp className="h-3 w-3" />
-                          <span>{formatCurrency(Math.round(calc.perWeek))}/semana</span>
-                        </div>
-                      )}
-
                       {/* Per-person for "both" */}
                       {goal.responsible === "both" && calc.perMonth !== null && calc.perMonth > 0 && (
                         <div className="text-xs px-2.5 py-2 rounded-md bg-secondary/50 space-y-1">
@@ -406,24 +398,6 @@ const Caixinha = () => {
                               💰 Capacidade individual: <span className="font-medium text-foreground">R$ {Math.round(capacity / 2)}/mês</span>
                             </p>
                           )}
-                        </div>
-                      )}
-
-                      {/* Viability message (only if not redundant with badge) */}
-                      {viability.message && viability.level !== "viable" && (
-                        <div className={`text-xs px-2.5 py-1.5 rounded-md ${viabilityColors[viability.level]}`}>
-                          {viability.message}
-                        </div>
-                      )}
-
-                      {/* Smart messages */}
-                      {smartMsgs.length > 0 && (
-                        <div className="space-y-1 pt-1">
-                          {smartMsgs.map((msg, i) => (
-                            <p key={i} className={`text-xs ${msg.color} italic`}>
-                              {msg.text}
-                            </p>
-                          ))}
                         </div>
                       )}
                     </CollapsibleContent>
