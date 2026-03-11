@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
 import { useSounds } from "@/contexts/SoundContext";
-import { formatCurrency, parseLocalDate } from "@/lib/data";
+import { formatCurrency, parseLocalDate, getCurrentInvoicePeriod } from "@/lib/data";
 import type { CreditCard } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
