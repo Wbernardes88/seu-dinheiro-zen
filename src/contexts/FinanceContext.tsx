@@ -33,6 +33,7 @@ type FinanceContextType = {
   challenge52Weeks: { week: number; amount: number; completed: boolean }[];
   toggleWeek: (week: number) => void;
 
+  refreshTransactions: () => Promise<void>;
   loading: boolean;
 };
 
