@@ -369,17 +369,6 @@ const Caixinha = () => {
                   </div>
                 </div>
 
-                {/* Registrar aporte button */}
-                {calc.pct < 100 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs h-8"
-                    onClick={() => openEdit(goal)}
-                  >
-                    Registrar aporte
-                  </Button>
-                )}
 
                 {/* Advanced info (collapsible) */}
                 {hasAdvancedInfo && calc.pct < 100 && (
