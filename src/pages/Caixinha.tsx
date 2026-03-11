@@ -52,30 +52,54 @@ function getGoalCalculations(goal: SavingsGoal) {
   return { remaining, pct, monthsLeft, weeksLeft, perMonth, perWeek, forecastDate };
 }
 
-function getMotivationalMessage(goal: SavingsGoal) {
+function getSmartMessages(goal: SavingsGoal): { text: string; color: string }[] {
   const { remaining, pct, monthsLeft, perMonth } = getGoalCalculations(goal);
+  const messages: { text: string; color: string }[] = [];
 
-  if (pct >= 100) return { text: "🎉 Parabéns! Meta alcançada!", color: "text-green-600 dark:text-green-400" };
+  if (pct >= 100) {
+    messages.push({ text: "🎉 Parabéns! Meta alcançada!", color: "text-green-600 dark:text-green-400" });
+    return messages;
+  }
 
-  if (pct >= 75) return { text: "🔥 Quase lá! Você já passou de 75% da meta!", color: "text-green-600 dark:text-green-400" };
+  // Progress-based
+  if (pct >= 75) {
+    messages.push({ text: "🔥 Quase lá! Você já passou de 75% da meta!", color: "text-green-600 dark:text-green-400" });
+  } else if (pct >= 50) {
+    messages.push({ text: "💪 Metade do caminho! Continue firme!", color: "text-primary" });
+  } else if (pct > 0) {
+    messages.push({ text: "🚀 Bom começo! Mantenha a consistência.", color: "text-muted-foreground" });
+  } else {
+    messages.push({ text: "✨ Comece hoje! Cada real conta.", color: "text-muted-foreground" });
+  }
 
-  if (pct >= 50) return { text: "💪 Metade do caminho! Continue firme!", color: "text-primary" };
+  // Pace-based
+  if (monthsLeft !== null && monthsLeft > 0 && perMonth !== null && perMonth > 0) {
+    if (monthsLeft <= 3) {
+      messages.push({ text: `⏰ Reta final! Faltam apenas ${monthsLeft} ${monthsLeft === 1 ? "mês" : "meses"}.`, color: "text-amber-600 dark:text-amber-400" });
+    } else {
+      messages.push({ text: "📊 Você está no ritmo para atingir a meta.", color: "text-muted-foreground" });
+    }
 
-  if (monthsLeft !== null && monthsLeft > 0) {
-    if (perMonth && perMonth > 0) {
-      const extraPerMonth = Math.round(perMonth * 0.2 * 100) / 100;
-      if (monthsLeft <= 3) {
-        return { text: `⏰ Faltam ${monthsLeft} ${monthsLeft === 1 ? "mês" : "meses"}! Se aumentar ${formatCurrency(extraPerMonth)}/mês, alcançará antes.`, color: "text-amber-600 dark:text-amber-400" };
-      }
-      return { text: `📅 Faltam ${monthsLeft} meses para concluir. Você está no ritmo!`, color: "text-muted-foreground" };
+    // Aggressive goal warning (high monthly amount)
+    if (perMonth > 2000 && goal.responsible !== "both") {
+      messages.push({ text: "⚠️ Meta agressiva para uma única renda. Considere dividir ou estender o prazo.", color: "text-amber-600 dark:text-amber-400" });
+    }
+
+    // Suggest extending deadline
+    if (perMonth > 1000 && monthsLeft < 12) {
+      const extendedMonths = monthsLeft + 6;
+      const reducedPerMonth = Math.round(remaining / extendedMonths);
+      messages.push({ text: `💡 Se aumentar o prazo em 6 meses, o valor mensal cai para R$ ${reducedPerMonth}.`, color: "text-muted-foreground" });
     }
   }
 
-  if (pct > 0) {
-    return { text: "🚀 Bom começo! Mantenha a consistência.", color: "text-muted-foreground" };
+  // Both responsible
+  if (goal.responsible === "both" && perMonth !== null && perMonth > 0) {
+    const perPerson = Math.round(perMonth / 2);
+    messages.push({ text: `👥 Contribuição conjunta: cada pessoa precisa guardar aproximadamente R$ ${perPerson} por mês.`, color: "text-primary" });
   }
 
-  return { text: "✨ Comece hoje! Cada real conta.", color: "text-muted-foreground" };
+  return messages;
 }
 
 const Caixinha = () => {
