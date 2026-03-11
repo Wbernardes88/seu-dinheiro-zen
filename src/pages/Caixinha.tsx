@@ -292,6 +292,17 @@ const Caixinha = () => {
             const viability = calc.pct >= 100
               ? { level: "viable" as ViabilityLevel, label: "Meta alcançada! 🎉", message: "" }
               : getViability(capacity, calc.perMonth);
+            const deadlineLabel = goal.deadline ? (() => {
+              const d = new Date(goal.deadline + "T00:00:00");
+              const monthNames = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+              return `Meta para ${monthNames[d.getMonth()]} de ${d.getFullYear()}`;
+            })() : null;
+
+            const hasAdvancedInfo = (capacity !== null && calc.pct < 100) ||
+              (calc.perWeek !== null) ||
+              (goal.responsible === "both" && calc.perMonth !== null && calc.perMonth > 0 && calc.pct < 100) ||
+              smartMsgs.length > 0;
+
             return (
               <div key={goal.id} className="card-glass p-4 space-y-3 group">
                 {/* Header */}
@@ -325,86 +336,101 @@ const Caixinha = () => {
                   </div>
                 )}
 
-                {/* Progress bar with label */}
+                {/* Progress bar */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">
                       {formatCurrency(goal.current)} de {formatCurrency(goal.target)}
                     </span>
-                    <span className="font-semibold text-primary">{Math.round(calc.pct)}% da meta concluída</span>
+                    <span className="font-semibold text-primary">{Math.round(calc.pct)}%</span>
                   </div>
                   <Progress value={calc.pct} className="h-2" />
                 </div>
 
-                {/* Responsible */}
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Users className="h-3 w-3" />
-                  <span>Responsável: <span className="font-medium text-foreground">{getResponsibleLabel(goal.responsible)}</span></span>
-                </div>
-
-                {/* Savings capacity */}
-                {capacity !== null && calc.pct < 100 && (
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Wallet className="h-3 w-3" />
-                    <span>Capacidade estimada: <span className="font-medium text-foreground">{formatCurrency(Math.max(capacity, 0))}/mês</span></span>
-                  </div>
-                )}
-
-                {/* Secondary info */}
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                {/* Secondary info: essentials only */}
+                <div className="space-y-1.5 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
                     <Target className="h-3 w-3 shrink-0" />
                     <span>Faltam: <span className="font-medium text-foreground">{formatCurrency(Math.round(calc.remaining))}</span></span>
                   </div>
                   {calc.monthsLeft !== null && calc.monthsLeft > 0 && (
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
                       <Calendar className="h-3 w-3 shrink-0" />
                       <span>{calc.monthsLeft} {calc.monthsLeft === 1 ? "mês restante" : "meses restantes"}</span>
                     </div>
                   )}
-                  {calc.perWeek !== null && (
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <TrendingUp className="h-3 w-3 shrink-0" />
-                      <span>{formatCurrency(Math.round(calc.perWeek))}/semana</span>
-                    </div>
-                  )}
-                  {goal.deadline && (
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                  {deadlineLabel && (
+                    <div className="flex items-center gap-1.5">
                       <Calendar className="h-3 w-3 shrink-0" />
-                      <span>Prazo: {new Date(goal.deadline + "T00:00:00").toLocaleDateString("pt-BR")}</span>
+                      <span>{deadlineLabel}</span>
                     </div>
                   )}
+                  <div className="flex items-center gap-1.5">
+                    <Users className="h-3 w-3 shrink-0" />
+                    <span>Responsável: <span className="font-medium text-foreground">{getResponsibleLabel(goal.responsible)}</span></span>
+                  </div>
                 </div>
 
-                {/* Viability message */}
-                {viability.message && calc.pct < 100 && (
-                  <div className={`text-xs px-2.5 py-1.5 rounded-md ${viabilityColors[viability.level]}`}>
-                    {viability.message}
-                  </div>
-                )}
+                {/* Advanced info (collapsible) */}
+                {hasAdvancedInfo && calc.pct < 100 && (
+                  <Collapsible>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors w-full pt-1 border-t border-border/50 group/trigger">
+                        <ChevronDown className="h-3 w-3 transition-transform group-data-[state=open]/trigger:rotate-180" />
+                        <span>Ver análise da meta</span>
+                      </button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-2 pt-2">
+                      {/* Capacity */}
+                      {capacity !== null && (
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Wallet className="h-3 w-3" />
+                          <span>Capacidade estimada: <span className="font-medium text-foreground">{formatCurrency(Math.max(capacity, 0))}/mês</span></span>
+                        </div>
+                      )}
 
-                {/* Per-person suggestion for "both" */}
-                {goal.responsible === "both" && calc.perMonth !== null && calc.perMonth > 0 && calc.pct < 100 && (
-                  <div className="text-xs px-2.5 py-2 rounded-md bg-secondary/50 space-y-1">
-                    <p className="text-muted-foreground">
-                      👥 Contribuição por pessoa: <span className="font-medium text-foreground">R$ {Math.round(calc.perMonth / 2)}/mês</span>
-                    </p>
-                    {capacity !== null && capacity > 0 && (
-                      <p className="text-muted-foreground">
-                        💰 Capacidade individual: <span className="font-medium text-foreground">R$ {Math.round(capacity / 2)}/mês</span>
-                      </p>
-                    )}
-                  </div>
-                )}
+                      {/* Weekly */}
+                      {calc.perWeek !== null && (
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <TrendingUp className="h-3 w-3" />
+                          <span>{formatCurrency(Math.round(calc.perWeek))}/semana</span>
+                        </div>
+                      )}
 
-                {/* Smart messages */}
-                <div className="space-y-1 border-t border-border/50 pt-2">
-                  {smartMsgs.map((msg, i) => (
-                    <p key={i} className={`text-xs ${msg.color} italic`}>
-                      {msg.text}
-                    </p>
-                  ))}
-                </div>
+                      {/* Per-person for "both" */}
+                      {goal.responsible === "both" && calc.perMonth !== null && calc.perMonth > 0 && (
+                        <div className="text-xs px-2.5 py-2 rounded-md bg-secondary/50 space-y-1">
+                          <p className="text-muted-foreground">
+                            👥 Contribuição por pessoa: <span className="font-medium text-foreground">R$ {Math.round(calc.perMonth / 2)}/mês</span>
+                          </p>
+                          {capacity !== null && capacity > 0 && (
+                            <p className="text-muted-foreground">
+                              💰 Capacidade individual: <span className="font-medium text-foreground">R$ {Math.round(capacity / 2)}/mês</span>
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Viability message (only if not redundant with badge) */}
+                      {viability.message && viability.level !== "viable" && (
+                        <div className={`text-xs px-2.5 py-1.5 rounded-md ${viabilityColors[viability.level]}`}>
+                          {viability.message}
+                        </div>
+                      )}
+
+                      {/* Smart messages */}
+                      {smartMsgs.length > 0 && (
+                        <div className="space-y-1 pt-1">
+                          {smartMsgs.map((msg, i) => (
+                            <p key={i} className={`text-xs ${msg.color} italic`}>
+                              {msg.text}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
               </div>
             );
           })}
