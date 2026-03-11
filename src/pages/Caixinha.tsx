@@ -287,21 +287,32 @@ const Caixinha = () => {
           {savingsGoals.map((goal) => {
             const calc = getGoalCalculations(goal);
             const smartMsgs = getSmartMessages(goal);
+            const capacity = getSavingsCapacity(transactions, goal.responsible, coupleMembers);
+            const viability = calc.pct >= 100
+              ? { level: "viable" as ViabilityLevel, label: "Meta alcançada! 🎉", message: "" }
+              : getViability(capacity, calc.perMonth);
             return (
               <div key={goal.id} className="card-glass p-4 space-y-3 group">
-                {/* Header */}
+                {/* Header with viability badge */}
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{goal.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-1.5">
                       <h3 className="text-sm font-semibold text-foreground truncate">{goal.name}</h3>
-                      <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(goal)}>
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-expense" onClick={() => { deleteSavingsGoal(goal.id); toast.success("Meta removida!"); }}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                      <div className="flex items-center gap-1">
+                        {calc.perMonth !== null && (
+                          <Badge className={`text-[10px] px-1.5 py-0 h-5 font-medium ${viabilityColors[viability.level]}`}>
+                            {viabilityIcons[viability.level]} {viability.label}
+                          </Badge>
+                        )}
+                        <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(goal)}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-expense" onClick={() => { deleteSavingsGoal(goal.id); toast.success("Meta removida!"); }}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -332,6 +343,14 @@ const Caixinha = () => {
                   <span>Responsável: <span className="font-medium text-foreground">{getResponsibleLabel(goal.responsible)}</span></span>
                 </div>
 
+                {/* Savings capacity */}
+                {capacity !== null && calc.pct < 100 && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Wallet className="h-3 w-3" />
+                    <span>Capacidade estimada: <span className="font-medium text-foreground">{formatCurrency(Math.max(capacity, 0))}/mês</span></span>
+                  </div>
+                )}
+
                 {/* Secondary info */}
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -357,6 +376,23 @@ const Caixinha = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Viability message */}
+                {viability.message && calc.pct < 100 && (
+                  <div className={`text-xs px-2.5 py-1.5 rounded-md ${viabilityColors[viability.level]}`}>
+                    {viability.message}
+                  </div>
+                )}
+
+                {/* Per-person suggestion for "both" */}
+                {goal.responsible === "both" && calc.perMonth !== null && calc.perMonth > 0 && calc.pct < 100 && (
+                  <div className="text-xs text-muted-foreground px-2.5 py-1.5 rounded-md bg-secondary/50">
+                    👥 Cada pessoa precisaria guardar cerca de <span className="font-medium text-foreground">R$ {Math.round(calc.perMonth / 2)}/mês</span>
+                    {capacity !== null && capacity > 0 && (
+                      <> — capacidade individual estimada: <span className="font-medium text-foreground">R$ {Math.round(capacity / 2)}/mês</span></>
+                    )}
+                  </div>
+                )}
 
                 {/* Smart messages */}
                 <div className="space-y-1 border-t border-border/50 pt-2">
