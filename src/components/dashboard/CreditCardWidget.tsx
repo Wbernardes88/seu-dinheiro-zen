@@ -11,24 +11,6 @@ const CreditCardWidget = () => {
 
   const cardData = useMemo(() => {
     return creditCards.map((card) => {
-      // Calculate invoice period based on closing day
-      const closingDay = card.closingDay;
-      const currentDay = now.getDate();
-      
-      // If we're past closing day, current invoice period is: closingDay of this month to closingDay of next month
-      // If we're before/on closing day, current invoice period is: closingDay of last month to closingDay of this month
-      let periodStart: Date;
-      let periodEnd: Date;
-      
-      if (currentDay > closingDay) {
-        // Last closed invoice: from closingDay+1 of previous month to closingDay of this month
-        periodStart = new Date(now.getFullYear(), now.getMonth() - 1, closingDay + 1);
-        periodEnd = new Date(now.getFullYear(), now.getMonth(), closingDay);
-      } else {
-        // Last closed invoice: from closingDay+1 of 2 months ago to closingDay of last month
-        periodStart = new Date(now.getFullYear(), now.getMonth() - 2, closingDay + 1);
-        periodEnd = new Date(now.getFullYear(), now.getMonth() - 1, closingDay);
-      }
 
       // Since imported invoices use the invoice month as transaction date,
       // simply filter by current month/year
