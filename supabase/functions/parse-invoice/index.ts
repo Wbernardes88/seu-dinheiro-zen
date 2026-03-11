@@ -68,8 +68,9 @@ serve(async (req) => {
 Analise o PDF da fatura e extraia TODOS os lançamentos de compras/gastos.
 
 REGRAS IMPORTANTES:
-- Extraia APENAS lançamentos de compras, saques e serviços (PIX, etc). 
-- NÃO inclua: pagamentos efetuados (valores negativos de pagamento), IOF, encargos, juros, multas, tarifas.
+- Extraia lançamentos de compras, saques, serviços (PIX, etc) e também IOF (Imposto sobre Operações Financeiras).
+- NÃO inclua: pagamentos efetuados (valores negativos de pagamento), encargos rotativos, juros de mora, multas, tarifas de anuidade.
+- IOF DEVE ser incluído como um lançamento normal com categoria "Taxas" ou a categoria mais próxima do usuário.
 - Para cada lançamento extraia: data (DD/MM), descrição do estabelecimento, valor em R$, e categoria sugerida.
 - Se o lançamento tiver indicação de parcela (ex: "01/03"), extraia installment_number e total_installments.
 - Mapeie categorias usando o contexto do estabelecimento. Categorias disponíveis do usuário: ${userCategories}
