@@ -223,16 +223,8 @@ const InvoiceImportDialog = ({ open, onOpenChange, card, onImportComplete }: Pro
         }
       }
 
-      // Manual refetch to ensure UI updates even if realtime fails
-      if (coupleId) {
-        const { data: refreshed } = await supabase
-          .from("transactions")
-          .select("*")
-          .eq("couple_id", coupleId)
-          .order("date", { ascending: false });
-        // We can't directly setTransactions here since we're outside FinanceContext,
-        // but the realtime subscription + this callback will handle it
-      }
+      // Force refetch transactions so the UI updates immediately
+      await refreshTransactions();
 
       setStep("done");
       play("kaching");
