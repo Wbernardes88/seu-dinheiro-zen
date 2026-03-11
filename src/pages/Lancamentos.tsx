@@ -85,6 +85,7 @@ const Lancamentos = () => {
     setIsRecurring(false);
     setIsFixed(false);
     toast.success(wasRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!");
+    play(type === "income" ? "kaching" : "swoosh");
     setTimeout(() => setIsSubmitting(false), 500);
   };
 
