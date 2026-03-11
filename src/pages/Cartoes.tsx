@@ -229,7 +229,7 @@ const Cartoes = () => {
                       Vence todo dia {card.dueDay}
                     </span>
                   </div>
-                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-medium leading-snug text-right ${
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-medium leading-snug text-left ${
                     purchaseInfo.status === "great" ? "bg-green-500/30 text-green-200" :
                     purchaseInfo.status === "warning" ? "bg-yellow-500/30 text-yellow-200" :
                     "bg-white/10 text-white/70"
