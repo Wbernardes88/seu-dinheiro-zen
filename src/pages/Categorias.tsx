@@ -12,6 +12,7 @@ import type { Category } from "@/lib/data";
 
 const Categorias = () => {
   const { categories, addCategory, updateCategory, deleteCategory } = useFinance();
+  const { play } = useSounds();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [name, setName] = useState("");
