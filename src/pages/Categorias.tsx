@@ -46,9 +46,11 @@ const Categorias = () => {
     if (editing) {
       updateCategory(editing.id, { name, type, icon: icon || "📁" });
       toast.success("Categoria atualizada!");
+      play("success");
     } else {
       addCategory({ name, type, icon: icon || "📁" });
       toast.success("Categoria criada!");
+      play("kaching");
     }
     setDialogOpen(false);
   };
