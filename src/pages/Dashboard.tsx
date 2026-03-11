@@ -336,7 +336,7 @@ const Dashboard = () => {
 };
 
 const SummaryCard = ({
-  icon, label, value, colorClass, bgClass, comparison, invertComparison,
+  icon, label, value, colorClass, bgClass, comparison, invertComparison, subtitle, subtitleValue,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -345,6 +345,8 @@ const SummaryCard = ({
   bgClass: string;
   comparison?: number | null;
   invertComparison?: boolean;
+  subtitle?: string;
+  subtitleValue?: string;
 }) => {
   const isPositive = invertComparison ? (comparison ?? 0) <= 0 : (comparison ?? 0) >= 0;
 
@@ -364,6 +366,16 @@ const SummaryCard = ({
                 {comparison > 0 ? "+" : ""}{comparison}% vs mês anterior
               </span>
             </div>
+          )}
+          {subtitle && (
+            <p className="text-[10px] text-muted-foreground mt-1">
+              💳 {subtitle}
+            </p>
+          )}
+          {subtitleValue && (
+            <p className="text-[10px] font-medium text-expense mt-0.5">
+              {subtitleValue}
+            </p>
           )}
         </div>
       </div>
