@@ -190,11 +190,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const addTransaction = useCallback(async (t: Omit<Transaction, "id">) => {
     if (!coupleId || !user) return;
 
-    const insertOne = async (data: Omit<Transaction, "id">) => {
+    const insertOne = async (data: Omit<Transaction, "id">, overrides?: { installment_group_id?: string; installment_number?: number; total_installments?: number; date?: string }) => {
       const result = await supabase.from("transactions").insert({
         couple_id: coupleId,
         user_id: user.id,
-        date: data.date,
+        date: overrides?.date || data.date,
         type: data.type,
         category: data.category,
         description: data.description,
@@ -202,6 +202,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         amount: data.amount,
         is_recurring: data.isRecurring || false,
         is_fixed: data.isFixed || false,
+        credit_card_id: data.creditCardId || null,
+        installment_group_id: overrides?.installment_group_id || data.installmentGroupId || null,
+        installment_number: overrides?.installment_number || data.installmentNumber || null,
+        total_installments: overrides?.total_installments || data.totalInstallments || null,
       });
       return result;
     };
