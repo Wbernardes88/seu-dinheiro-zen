@@ -65,19 +65,21 @@ serve(async (req) => {
       : "Alimentação, Transporte, Moradia, Saúde, Educação, Lazer, Compras, Assinaturas";
 
     const systemPrompt = `Você é um assistente especializado em extrair dados de faturas de cartão de crédito brasileiras.
-Analise o PDF da fatura e extraia TODOS os lançamentos de compras/gastos.
+Analise o PDF da fatura e extraia ABSOLUTAMENTE TODOS os lançamentos, sem exceção.
 
 REGRAS IMPORTANTES:
-- Extraia lançamentos de compras, saques, serviços (PIX, etc) e também IOF (Imposto sobre Operações Financeiras).
-- NÃO inclua: pagamentos efetuados (valores negativos de pagamento), encargos rotativos, juros de mora, multas, tarifas de anuidade.
-- IOF DEVE ser incluído como um lançamento normal com categoria "Taxas" ou a categoria mais próxima do usuário.
+- Extraia TODOS os lançamentos: compras, saques, serviços (PIX, etc), débitos diversos, e OBRIGATORIAMENTE IOF.
+- IOF (Imposto sobre Operações Financeiras): SEMPRE extraia TODAS as linhas de IOF, incluindo "IOF DIAR", "IOF ADIC", "IOF ROT", etc. Mesmo que o valor seja centavos (ex: R$ 0,08), DEVE ser extraído. Use a data de referência do IOF ou a data mais próxima disponível. Categoria: "Taxas" ou a mais próxima do usuário.
+- NÃO inclua APENAS: pagamentos efetuados (linhas com "PAGTO", "PAGAMENTO", valores negativos), encargos rotativos, juros de mora, multas, tarifas de anuidade.
+- Seções como "Débitos diversos", "Compras Diversas", "Companhias Aéreas" são AGRUPAMENTOS — extraia cada lançamento individual dentro dessas seções.
 - Para cada lançamento extraia: data (DD/MM), descrição do estabelecimento, valor em R$, e categoria sugerida.
-- Se o lançamento tiver indicação de parcela (ex: "01/03"), extraia installment_number e total_installments.
+- Se o lançamento tiver indicação de parcela (ex: "PARC 01/03" ou "01/03"), extraia installment_number e total_installments.
 - Mapeie categorias usando o contexto do estabelecimento. Categorias disponíveis do usuário: ${userCategories}
 - Se o banco incluir categoria (ALIMENTAÇÃO, VEÍCULOS, etc), use como referência para mapear.
-- A data do lançamento deve estar no formato YYYY-MM-DD. Use o ano da fatura como referência.
+- A data do lançamento deve estar no formato YYYY-MM-DD. Use o ano da fatura como referência. Se a data tiver apenas DD/MM, infira o ano pelo contexto da fatura.
 - Valores devem ser números positivos (sem sinal de menos).
 - Ignore lançamentos com valor zero ou negativo (são pagamentos).
+- CONFIRA: a soma dos valores extraídos deve bater com o subtotal/total da fatura (excluindo pagamentos). Se faltar valor, procure lançamentos que você pode ter pulado.
 
 Retorne os dados usando a função extract_transactions.`;
 
