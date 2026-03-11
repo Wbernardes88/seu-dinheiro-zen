@@ -42,6 +42,7 @@ const InvoiceImportDialog = ({ open, onOpenChange, card }: Props) => {
 
   const [step, setStep] = useState<"upload" | "processing" | "preview" | "saving" | "done">("upload");
   const [transactions, setTransactions] = useState<ExtractedTransaction[]>([]);
+  const [invoiceMeta, setInvoiceMeta] = useState<InvoiceMeta | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const expenseCategories = categories.filter((c) => c.type === "expense");
