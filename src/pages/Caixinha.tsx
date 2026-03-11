@@ -287,7 +287,7 @@ const Caixinha = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {savingsGoals.map((goal) => {
             const calc = getGoalCalculations(goal);
-            const smartMsgs = getSmartMessages(goal);
+            
             const capacity = getSavingsCapacity(transactions, goal.responsible, coupleMembers);
             const viability = calc.pct >= 100
               ? { level: "viable" as ViabilityLevel, label: "Meta alcançada! 🎉", message: "" }
