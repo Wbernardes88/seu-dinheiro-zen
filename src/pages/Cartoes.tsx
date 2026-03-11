@@ -75,7 +75,7 @@ const Cartoes = () => {
   const [invoiceMonth, setInvoiceMonth] = useState(now.getMonth());
   const [invoiceYear, setInvoiceYear] = useState(now.getFullYear());
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
-
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const openNew = () => {
     setEditing(null);
     setName("");
