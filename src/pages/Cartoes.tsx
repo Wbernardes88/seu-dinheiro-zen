@@ -450,6 +450,10 @@ const Cartoes = () => {
           open={importDialogOpen}
           onOpenChange={setImportDialogOpen}
           card={activeCard}
+          onImportComplete={(month0, year) => {
+            setInvoiceMonth(month0);
+            setInvoiceYear(year);
+          }}
         />
       )}
     </div>
