@@ -32,29 +32,27 @@ const AppLayout = () => {
     <div className="min-h-screen bg-background flex">
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-60 border-r bg-card p-4 gap-1 fixed h-full">
-        <div className="flex items-center justify-between px-3 py-4 mb-4">
-          <div className="flex items-center gap-2">
-            <img src={logo} alt="FinançasJá" className="h-8 w-8 rounded-lg object-contain" />
-            <span className="font-semibold text-lg text-foreground">FinançasJá</span>
-          </div>
-          <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2 px-3 py-4 mb-4">
+          <img src={logo} alt="FinançasJá" className="h-8 w-8 rounded-lg object-contain shrink-0" />
+          <span className="font-semibold text-lg text-foreground truncate min-w-0">FinançasJá</span>
+          <div className="flex items-center gap-0.5 shrink-0 ml-auto">
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full"
+              className="h-7 w-7 rounded-full"
               onClick={() => { toggleSound(); play("tap"); }}
               title={soundEnabled ? "Desativar sons" : "Ativar sons"}
             >
-              {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              {soundEnabled ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full"
+              className="h-7 w-7 rounded-full"
               onClick={toggleTheme}
               title={theme === "light" ? "Modo escuro" : "Modo claro"}
             >
-              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              {theme === "light" ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
             </Button>
           </div>
         </div>
