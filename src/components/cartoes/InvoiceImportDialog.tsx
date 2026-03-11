@@ -93,8 +93,18 @@ const InvoiceImportDialog = ({ open, onOpenChange, card }: Props) => {
         throw new Error("Nenhum lançamento encontrado na fatura");
       }
 
+      // Capture invoice month/year from AI response
+      const invYear = data.invoice_year || new Date().getFullYear();
+      const invMonth = data.invoice_month || (new Date().getMonth() + 1); // 1-based
+      setInvoiceMeta({ invoice_year: invYear, invoice_month: invMonth });
+
+      // Compute the invoice date: use closing day of the invoice month
+      // so all transactions fall within the correct invoice period
+      const invoiceDate = `${invYear}-${String(invMonth).padStart(2, '0')}-${String(card.closingDay).padStart(2, '0')}`;
+
       const mapped: ExtractedTransaction[] = data.transactions.map((t: any) => ({
-        date: t.date,
+        date: invoiceDate,
+        originalDate: t.date,
         description: t.description,
         amount: Number(t.amount),
         category: matchCategory(t.category, expenseCategories),
