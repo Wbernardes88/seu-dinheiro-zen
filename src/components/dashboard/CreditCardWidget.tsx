@@ -53,7 +53,7 @@ const CreditCardWidget = () => {
                 <span className="text-xs font-medium text-foreground">{card.name}</span>
               </div>
               <span className="text-xs text-muted-foreground">
-                {formatCurrency(card.spent)} / {formatCurrency(card.creditLimit)}
+                {formatCurrency(card.spent)} de {formatCurrency(card.creditLimit)}
               </span>
             </div>
             <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
