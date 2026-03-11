@@ -20,6 +20,7 @@ const navItems = [
 const AppLayout = () => {
   const { theme, toggleTheme } = useTheme();
   const { user, signOut, nickname, coupleMembers } = useAuth();
+  const { soundEnabled, toggleSound, play } = useSounds();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const displayName = nickname || user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Usuário";
