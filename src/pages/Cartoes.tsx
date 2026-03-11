@@ -251,6 +251,16 @@ const Cartoes = () => {
               Fatura — {activeCard.name}
             </h3>
             <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs"
+                onClick={() => setImportDialogOpen(true)}
+              >
+                <FileUp className="h-3.5 w-3.5" />
+                Importar PDF
+              </Button>
+              <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={prevMonth}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
