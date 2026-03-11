@@ -143,9 +143,14 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       .channel(`couple-${coupleId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "transactions", filter: `couple_id=eq.${coupleId}` }, () => {
         supabase.from("transactions").select("*").eq("couple_id", coupleId).order("date", { ascending: false }).then(({ data }) => {
-          if (data) setTransactions(data.map((t) => ({
+          if (data) setTransactions(data.map((t: any) => ({
             id: t.id, date: t.date, type: t.type as "income" | "expense", category: t.category,
-            description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount), isRecurring: t.is_recurring, isFixed: t.is_fixed, userId: t.user_id,
+            description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount),
+            isRecurring: t.is_recurring, isFixed: t.is_fixed, userId: t.user_id,
+            creditCardId: t.credit_card_id || undefined,
+            installmentGroupId: t.installment_group_id || undefined,
+            installmentNumber: t.installment_number || undefined,
+            totalInstallments: t.total_installments || undefined,
           })));
         });
       })
