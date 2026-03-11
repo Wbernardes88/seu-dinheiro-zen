@@ -36,16 +36,26 @@ const AppLayout = () => {
             <img src={logo} alt="FinançasJá" className="h-8 w-8 rounded-lg object-contain" />
             <span className="font-semibold text-lg text-foreground">FinançasJá</span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full"
-            onClick={toggleTheme}
-            title={theme === "light" ? "Modo escuro" : "Modo claro"}
-          >
-            {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-          </Button>
-        </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={() => { toggleSound(); play("tap"); }}
+              title={soundEnabled ? "Desativar sons" : "Ativar sons"}
+            >
+              {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={toggleTheme}
+              title={theme === "light" ? "Modo escuro" : "Modo claro"}
+            >
+              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            </Button>
+          </div>
 
         {isCoupleMode && (
           <div className="mx-3 mb-3 px-2 py-1 rounded-md bg-primary/10 text-primary text-[11px] font-medium text-center">
