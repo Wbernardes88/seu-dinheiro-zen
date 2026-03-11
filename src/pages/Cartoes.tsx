@@ -176,7 +176,7 @@ const Cartoes = () => {
             return (
               <div
                 key={card.id}
-                className={`rounded-2xl p-5 text-white relative overflow-hidden cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg ${selectedCardId === card.id ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}
+                className={`rounded-2xl p-6 text-white relative overflow-hidden cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg ${selectedCardId === card.id ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}
                 style={{ background: `linear-gradient(135deg, ${card.color}, ${card.color}dd)` }}
                 onClick={() => setSelectedCardId(selectedCardId === card.id ? null : card.id)}
               >
