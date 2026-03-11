@@ -86,8 +86,8 @@ const Dashboard = () => {
       let m = month - i;
       let y = year;
       while (m < 0) { m += 12; y--; }
-      const inc = transactions.filter(t => { const d = parseLocalDate(t.date); return t.type === "income" && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
-      const exp = transactions.filter(t => { const d = parseLocalDate(t.date); return t.type === "expense" && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
+      const inc = transactions.filter(t => { const d = parseLocalDate(t.date); return t.type === "income" && !t.creditCardId && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
+      const exp = transactions.filter(t => { const d = parseLocalDate(t.date); return t.type === "expense" && !t.creditCardId && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
       data.push({ name: shortMonthLabels[m], entradas: inc, saidas: exp });
     }
     return data;
