@@ -218,18 +218,18 @@ const Cartoes = () => {
                 </div>
 
                 {/* Info row */}
-                <div className="flex items-center justify-between text-xs text-white/60">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="flex items-center gap-1">
+                <div className="flex items-start justify-between text-xs text-white/60 pt-1 gap-4">
+                  <div className="flex flex-col gap-1.5 shrink-0">
+                    <span className="flex items-center gap-1.5">
                       <Calendar className="h-3 w-3" />
-                      Fecha dia {card.closingDay}
+                      Fecha todo dia {card.closingDay}
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1.5">
                       <Calendar className="h-3 w-3" />
-                      Vence dia {card.dueDay}
+                      Vence todo dia {card.dueDay}
                     </span>
                   </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-medium leading-snug text-right ${
                     purchaseInfo.status === "great" ? "bg-green-500/30 text-green-200" :
                     purchaseInfo.status === "warning" ? "bg-yellow-500/30 text-yellow-200" :
                     "bg-white/10 text-white/70"
