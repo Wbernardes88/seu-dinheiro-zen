@@ -220,6 +220,53 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_cards: {
+        Row: {
+          brand: string
+          closing_day: number
+          color: string
+          couple_id: string
+          created_at: string
+          credit_limit: number
+          due_day: number
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          brand?: string
+          closing_day?: number
+          color?: string
+          couple_id: string
+          created_at?: string
+          credit_limit?: number
+          due_day?: number
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          brand?: string
+          closing_day?: number
+          color?: string
+          couple_id?: string
+          created_at?: string
+          credit_limit?: number
+          due_day?: number
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_cards_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -300,12 +347,16 @@ export type Database = {
           category: string
           couple_id: string
           created_at: string
+          credit_card_id: string | null
           date: string
           description: string
           id: string
+          installment_group_id: string | null
+          installment_number: number | null
           is_fixed: boolean
           is_recurring: boolean
           payment_method: string
+          total_installments: number | null
           type: string
           user_id: string
         }
@@ -314,12 +365,16 @@ export type Database = {
           category: string
           couple_id: string
           created_at?: string
+          credit_card_id?: string | null
           date?: string
           description?: string
           id?: string
+          installment_group_id?: string | null
+          installment_number?: number | null
           is_fixed?: boolean
           is_recurring?: boolean
           payment_method?: string
+          total_installments?: number | null
           type: string
           user_id: string
         }
@@ -328,12 +383,16 @@ export type Database = {
           category?: string
           couple_id?: string
           created_at?: string
+          credit_card_id?: string | null
           date?: string
           description?: string
           id?: string
+          installment_group_id?: string | null
+          installment_number?: number | null
           is_fixed?: boolean
           is_recurring?: boolean
           payment_method?: string
+          total_installments?: number | null
           type?: string
           user_id?: string
         }
@@ -343,6 +402,13 @@ export type Database = {
             columns: ["couple_id"]
             isOneToOne: false
             referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_credit_card_id_fkey"
+            columns: ["credit_card_id"]
+            isOneToOne: false
+            referencedRelation: "credit_cards"
             referencedColumns: ["id"]
           },
         ]
