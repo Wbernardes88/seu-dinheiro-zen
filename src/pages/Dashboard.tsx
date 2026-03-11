@@ -49,9 +49,16 @@ const Dashboard = () => {
     });
   }, [transactions, month, year]);
 
-  const totalIncome = filtered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
-  const totalExpense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+  // Separate cash vs credit card transactions
+  const cashFiltered = filtered.filter((t) => !t.creditCardId);
+  const creditCardFiltered = filtered.filter((t) => !!t.creditCardId);
+
+  const totalIncome = cashFiltered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  const totalExpense = cashFiltered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   const balance = totalIncome - totalExpense;
+
+  // Pending credit card debt for the period
+  const pendingCreditCard = creditCardFiltered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
 
   // Previous month data for comparison
   const prevMonthData = useMemo(() => {
