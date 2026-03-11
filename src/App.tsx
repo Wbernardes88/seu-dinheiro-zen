@@ -58,30 +58,32 @@ const App = () => (
             <Toaster />
             <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <FinanceProvider>
-                      <AppLayout />
-                    </FinanceProvider>
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/lancamentos" element={<Lancamentos />} />
-                <Route path="/categorias" element={<Categorias />} />
-                <Route path="/limites" element={<LimiteGastos />} />
-                <Route path="/caixinha" element={<Caixinha />} />
-                <Route path="/desafio" element={<Desafio52Semanas />} />
-                <Route path="/cartoes" element={<Cartoes />} />
-                <Route path="/casal" element={<CoupleManage />} />
-                <Route path="/documentacao" element={<Documentacao />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <FinanceProvider>
+                        <AppLayout />
+                      </FinanceProvider>
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/lancamentos" element={<Lancamentos />} />
+                  <Route path="/categorias" element={<Categorias />} />
+                  <Route path="/limites" element={<LimiteGastos />} />
+                  <Route path="/caixinha" element={<Caixinha />} />
+                  <Route path="/desafio" element={<Desafio52Semanas />} />
+                  <Route path="/cartoes" element={<Cartoes />} />
+                  <Route path="/casal" element={<CoupleManage />} />
+                  <Route path="/documentacao" element={<Documentacao />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
           </AuthProvider>
         </TooltipProvider>
