@@ -165,6 +165,8 @@ const Dashboard = () => {
           colorClass="text-foreground"
           bgClass="bg-primary/10"
           comparison={balanceComparison}
+          subtitle={pendingCreditCard > 0 ? `Faturas pendentes: -${formatCurrency(pendingCreditCard)}` : undefined}
+          subtitleValue={pendingCreditCard > 0 ? `Líquido: ${formatCurrency(balance - pendingCreditCard)}` : undefined}
         />
         <SummaryCard
           icon={<TrendingUp className="h-6 w-6 text-income" />}
@@ -182,6 +184,7 @@ const Dashboard = () => {
           bgClass="bg-expense/10"
           comparison={expenseComparison}
           invertComparison
+          subtitle={pendingCreditCard > 0 ? `+ ${formatCurrency(pendingCreditCard)} no cartão` : undefined}
         />
       </div>
 
