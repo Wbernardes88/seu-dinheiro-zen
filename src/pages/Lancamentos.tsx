@@ -262,8 +262,12 @@ const Lancamentos = () => {
                     className="h-7 w-7 opacity-0 group-hover:opacity-100 text-expense"
                     onClick={async () => {
                       const removed = await deleteTransaction(t.id);
-                      if (removed) toast.success("Removido!");
-                      else toast.error("Não foi possível remover o lançamento.");
+                      if (removed) {
+                        play("delete");
+                        toast.success("Removido!");
+                      } else {
+                        toast.error("Não foi possível remover o lançamento.");
+                      }
                     }}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
