@@ -19,7 +19,7 @@ const getLocalDateStr = () => {
 };
 
 const Lancamentos = () => {
-  const { transactions, addTransaction, deleteTransaction, updateTransaction, categories } = useFinance();
+  const { transactions, addTransaction, deleteTransaction, updateTransaction, categories, creditCards } = useFinance();
   const { coupleMembers } = useAuth();
   const { play } = useSounds();
 
