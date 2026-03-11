@@ -58,8 +58,9 @@ function getBestPurchaseInfo(closingDay: number) {
 const months = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
 const Cartoes = () => {
-  const { creditCards, addCreditCard, updateCreditCard, deleteCreditCard, transactions } = useFinance();
+  const { creditCards, addCreditCard, updateCreditCard, deleteCreditCard, transactions, deleteTransaction } = useFinance();
   const { play } = useSounds();
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CreditCard | null>(null);
@@ -288,26 +289,69 @@ const Cartoes = () => {
                 {invoiceTx.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-6">Nenhum lançamento nesta fatura</p>
                 ) : (
-                  <div className="space-y-1">
-                    {invoiceTx.map((t) => (
-                      <div key={t.id} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
-                            {t.description}
-                            {t.totalInstallments && t.totalInstallments > 1 && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium shrink-0">
-                                {t.installmentNumber}/{t.totalInstallments}
-                              </span>
-                            )}
-                          </p>
-                          <p className="text-xs text-muted-foreground">{t.category} · {t.date}</p>
-                        </div>
-                        <span className={`text-sm font-semibold ${t.type === "income" ? "text-income" : "text-expense"}`}>
-                          {t.type === "income" ? "+" : "-"}{formatCurrency(t.amount)}
-                        </span>
+                  <>
+                    {invoiceTx.length > 1 && (
+                      <div className="flex justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5"
+                          disabled={deletingIds.size > 0}
+                          onClick={async () => {
+                            if (!confirm(`Excluir todos os ${invoiceTx.length} lançamentos desta fatura?`)) return;
+                            setDeletingIds(new Set(invoiceTx.map(t => t.id)));
+                            let count = 0;
+                            for (const t of invoiceTx) {
+                              const ok = await deleteTransaction(t.id);
+                              if (ok) count++;
+                            }
+                            setDeletingIds(new Set());
+                            play("delete");
+                            toast.success(`${count} lançamentos excluídos!`);
+                          }}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Excluir todos ({invoiceTx.length})
+                        </Button>
                       </div>
-                    ))}
-                  </div>
+                    )}
+                    <div className="space-y-1">
+                      {invoiceTx.map((t) => (
+                        <div key={t.id} className={`group flex items-center justify-between py-2 border-b border-border/50 last:border-0 ${deletingIds.has(t.id) ? "opacity-40" : ""}`}>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
+                              {t.description}
+                              {t.totalInstallments && t.totalInstallments > 1 && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium shrink-0">
+                                  {t.installmentNumber}/{t.totalInstallments}
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{t.category} · {t.date}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm font-semibold ${t.type === "income" ? "text-income" : "text-expense"}`}>
+                              {t.type === "income" ? "+" : "-"}{formatCurrency(t.amount)}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive shrink-0"
+                              disabled={deletingIds.has(t.id)}
+                              onClick={async () => {
+                                setDeletingIds(prev => new Set(prev).add(t.id));
+                                const ok = await deleteTransaction(t.id);
+                                setDeletingIds(prev => { const n = new Set(prev); n.delete(t.id); return n; });
+                                if (ok) { play("delete"); toast.success("Lançamento excluído!"); }
+                              }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
               </>
             );
