@@ -143,11 +143,13 @@ const Cartoes = () => {
     let periodEnd: Date;
     
     if (currentDay > closingDay) {
-      periodStart = new Date(now.getFullYear(), now.getMonth(), closingDay + 1);
-      periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, closingDay);
-    } else {
+      // Last closed invoice: closingDay+1 of prev month to closingDay of this month
       periodStart = new Date(now.getFullYear(), now.getMonth() - 1, closingDay + 1);
       periodEnd = new Date(now.getFullYear(), now.getMonth(), closingDay);
+    } else {
+      // Last closed invoice: closingDay+1 of 2 months ago to closingDay of last month
+      periodStart = new Date(now.getFullYear(), now.getMonth() - 2, closingDay + 1);
+      periodEnd = new Date(now.getFullYear(), now.getMonth() - 1, closingDay);
     }
 
     return transactions
