@@ -37,7 +37,7 @@ type Props = {
   onImportComplete?: (month0based: number, year: number) => void;
 };
 
-const InvoiceImportDialog = ({ open, onOpenChange, card, onImportComplete }: Props) => {
+const InvoiceImportDialog = ({ open, onOpenChange, card, selectedMonth, selectedYear, onImportComplete }: Props) => {
   const { categories, refreshTransactions } = useFinance();
   const { user, coupleId } = useAuth();
   const { play } = useSounds();
