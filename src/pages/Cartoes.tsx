@@ -216,7 +216,7 @@ const Cartoes = () => {
                 {/* Limit usage */}
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-xs">
-                    <span className="text-white/70">Usado: {formatCurrency(spent)}</span>
+                    <span className="text-white/70">Fatura atual: {formatCurrency(spent)}</span>
                     <span className="text-white/70">Limite: {formatCurrency(card.creditLimit)}</span>
                   </div>
                   <div className="h-2 bg-white/20 rounded-full overflow-hidden">

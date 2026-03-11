@@ -334,7 +334,7 @@ const InvoiceImportDialog = ({ open, onOpenChange, card }: Props) => {
                         </span>
                       )}
                     </p>
-                    <p className="text-xs text-muted-foreground">{t.date}</p>
+                    <p className="text-xs text-muted-foreground">Compra: {t.originalDate}</p>
                   </div>
                   <Select value={t.category} onValueChange={(v) => updateCategory(i, v)}>
                     <SelectTrigger className="w-[140px] h-8 text-xs">
