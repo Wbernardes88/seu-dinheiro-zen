@@ -68,25 +68,42 @@ const Lancamentos = () => {
       toast.error("Preencha todos os campos");
       return;
     }
+    if (paymentMethod === "Cartão crédito" && creditCards.length > 0 && !selectedCardId) {
+      toast.error("Selecione um cartão de crédito");
+      return;
+    }
     setIsSubmitting(true);
     const wasRecurring = isRecurring;
+    const numInstallments = parseInt(installments) || 1;
+    const installmentAmount = numInstallments > 1 ? Math.round((parseFloat(amount) / numInstallments) * 100) / 100 : parseFloat(amount);
+    const groupId = numInstallments > 1 ? crypto.randomUUID() : undefined;
+
     addTransaction({
       date,
       type,
       category,
-      description,
+      description: numInstallments > 1 ? `${description} (1/${numInstallments})` : description,
       paymentMethod,
-      amount: parseFloat(amount),
+      amount: installmentAmount,
       isRecurring,
       isFixed,
+      creditCardId: paymentMethod === "Cartão crédito" && selectedCardId ? selectedCardId : undefined,
+      installmentGroupId: groupId,
+      installmentNumber: numInstallments > 1 ? 1 : undefined,
+      totalInstallments: numInstallments > 1 ? numInstallments : undefined,
     });
     setDescription("");
     setAmount("");
     setCategory("");
     setPaymentMethod("");
+    setSelectedCardId("");
+    setInstallments("1");
     setIsRecurring(false);
     setIsFixed(false);
-    toast.success(wasRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!");
+    const msg = numInstallments > 1 
+      ? `Compra parcelada em ${numInstallments}x de ${formatCurrency(installmentAmount)}!`
+      : wasRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!";
+    toast.success(msg);
     play(type === "income" ? "kaching" : "swoosh");
     setTimeout(() => setIsSubmitting(false), 500);
   };
