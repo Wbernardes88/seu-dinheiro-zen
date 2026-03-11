@@ -21,14 +21,13 @@ const CreditCardWidget = () => {
       let periodEnd: Date;
       
       if (currentDay > closingDay) {
-        // Current invoice: from closingDay+1 of this month to closingDay of next month
-        periodStart = new Date(now.getFullYear(), now.getMonth(), closingDay + 1);
-        const nextMonth = now.getMonth() + 1;
-        periodEnd = new Date(now.getFullYear(), nextMonth, closingDay);
-      } else {
-        // Current invoice: from closingDay+1 of last month to closingDay of this month
+        // Last closed invoice: from closingDay+1 of previous month to closingDay of this month
         periodStart = new Date(now.getFullYear(), now.getMonth() - 1, closingDay + 1);
         periodEnd = new Date(now.getFullYear(), now.getMonth(), closingDay);
+      } else {
+        // Last closed invoice: from closingDay+1 of 2 months ago to closingDay of last month
+        periodStart = new Date(now.getFullYear(), now.getMonth() - 2, closingDay + 1);
+        periodEnd = new Date(now.getFullYear(), now.getMonth() - 1, closingDay);
       }
 
       const spent = transactions
@@ -79,7 +78,7 @@ const CreditCardWidget = () => {
               />
             </div>
             <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-              <span>{Math.round(card.usagePct)}% usado</span>
+              <span>Fatura: {Math.round(card.usagePct)}%</span>
               <span className="flex items-center gap-1">
                 <Calendar className="h-2.5 w-2.5" />
                 Vence dia {card.dueDay}
