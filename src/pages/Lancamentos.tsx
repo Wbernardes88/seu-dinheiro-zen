@@ -39,6 +39,8 @@ const Lancamentos = () => {
   const [isRecurring, setIsRecurring] = useState(false);
   const [isFixed, setIsFixed] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [selectedCardId, setSelectedCardId] = useState("");
+  const [installments, setInstallments] = useState("1");
 
   // Filter state
   const now = new Date();
