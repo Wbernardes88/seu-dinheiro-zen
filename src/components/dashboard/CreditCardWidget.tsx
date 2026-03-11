@@ -30,11 +30,16 @@ const CreditCardWidget = () => {
         periodEnd = new Date(now.getFullYear(), now.getMonth() - 1, closingDay);
       }
 
+      // Since imported invoices use the invoice month as transaction date,
+      // simply filter by current month/year
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
       const spent = transactions
         .filter((t) => {
           if (t.creditCardId !== card.id || t.type !== "expense") return false;
           const d = parseLocalDate(t.date);
-          return d >= periodStart && d <= periodEnd;
+          return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
         })
         .reduce((sum, t) => sum + t.amount, 0);
 
