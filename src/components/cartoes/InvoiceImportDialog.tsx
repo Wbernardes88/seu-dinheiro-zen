@@ -32,6 +32,7 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   card: CreditCard;
+  onImportComplete?: (month0based: number, year: number) => void;
 };
 
 const InvoiceImportDialog = ({ open, onOpenChange, card }: Props) => {
