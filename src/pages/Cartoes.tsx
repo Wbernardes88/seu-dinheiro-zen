@@ -25,17 +25,7 @@ const cardColors = [
   { label: "Preto", value: "#1a1a1a" },
 ];
 
-function getInvoicePeriod(closingDay: number, month: number, year: number) {
-  // Invoice period: from closing day of previous month to closing day of current month
-  let startMonth = month - 1;
-  let startYear = year;
-  if (startMonth < 0) { startMonth = 11; startYear--; }
-  
-  const startDate = new Date(startYear, startMonth, closingDay + 1);
-  const endDate = new Date(year, month, closingDay);
-  
-  return { startDate, endDate };
-}
+// Invoice period calculation removed - now using calendar month matching
 
 function getBestPurchaseInfo(closingDay: number) {
   const today = new Date();
