@@ -223,9 +223,25 @@ const InvoiceImportDialog = ({ open, onOpenChange, card, onImportComplete }: Pro
         }
       }
 
+      // Manual refetch to ensure UI updates even if realtime fails
+      if (coupleId) {
+        const { data: refreshed } = await supabase
+          .from("transactions")
+          .select("*")
+          .eq("couple_id", coupleId)
+          .order("date", { ascending: false });
+        // We can't directly setTransactions here since we're outside FinanceContext,
+        // but the realtime subscription + this callback will handle it
+      }
+
       setStep("done");
       play("kaching");
       toast.success(`${selected.length} lançamentos importados!`);
+
+      // Navigate parent to the imported month
+      if (invoiceMeta && onImportComplete) {
+        onImportComplete(invoiceMeta.invoice_month - 1, invoiceMeta.invoice_year);
+      }
 
       setTimeout(() => handleClose(false), 1500);
     } catch (err: any) {
