@@ -51,6 +51,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [budgetLimitsRaw, setBudgetLimitsRaw] = useState<{ id: string; categoryId: string; category: string; budget: number }[]>([]);
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([]);
   const [weeks, setWeeks] = useState<{ week: number; amount: number; completed: boolean }[]>([]);
+  const [creditCards, setCreditCards] = useState<CreditCard[]>([]);
+  const [loading, setLoading] = useState(true);
   const [loading, setLoading] = useState(true);
 
   // ---- FETCH ALL DATA ----
