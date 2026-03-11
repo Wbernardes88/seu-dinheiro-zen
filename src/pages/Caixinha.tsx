@@ -334,18 +334,23 @@ const Caixinha = () => {
                   </div>
                 )}
 
-                {/* Progress bar */}
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">
+                {/* Enhanced progress */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
                       {formatCurrency(goal.current)} de {formatCurrency(goal.target)}
                     </span>
-                    <span className="font-semibold text-primary">{Math.round(calc.pct)}%</span>
+                    <span className="text-sm font-bold text-primary">{Math.round(calc.pct)}%</span>
                   </div>
-                  <Progress value={calc.pct} className="h-2" />
+                  <Progress value={calc.pct} className="h-2.5" />
+                  <p className="text-[11px] text-muted-foreground text-center">
+                    {calc.pct >= 100
+                      ? "🎉 Meta concluída!"
+                      : `${Math.round(calc.pct)}% da meta concluída`}
+                  </p>
                 </div>
 
-                {/* Secondary info: essentials only */}
+                {/* Secondary info */}
                 <div className="space-y-1.5 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1.5">
                     <Target className="h-3 w-3 shrink-0" />
@@ -369,6 +374,18 @@ const Caixinha = () => {
                   </div>
                 </div>
 
+                {/* Registrar aporte button */}
+                {calc.pct < 100 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs h-8"
+                    onClick={() => openEdit(goal)}
+                  >
+                    Registrar aporte
+                  </Button>
+                )}
+
                 {/* Advanced info (collapsible) */}
                 {hasAdvancedInfo && calc.pct < 100 && (
                   <Collapsible>
@@ -378,9 +395,51 @@ const Caixinha = () => {
                         <span>Ver análise da meta</span>
                       </button>
                     </CollapsibleTrigger>
-                    <CollapsibleContent className="space-y-2 pt-2">
-                      {/* Capacity */}
-                      {capacity !== null && (
+                    <CollapsibleContent className="space-y-3 pt-2">
+                      {/* Visual comparison: needed vs capacity */}
+                      {capacity !== null && calc.perMonth !== null && calc.perMonth > 0 && (
+                        <div className="space-y-2 text-xs">
+                          <p className="text-muted-foreground font-medium">Meta vs. Capacidade</p>
+                          {(() => {
+                            const capVal = Math.max(capacity, 0);
+                            const needed = Math.round(calc.perMonth);
+                            const maxVal = Math.max(capVal, needed, 1);
+                            const neededPct = Math.min((needed / maxVal) * 100, 100);
+                            const capPct = Math.min((capVal / maxVal) * 100, 100);
+                            return (
+                              <div className="space-y-1.5">
+                                <div className="space-y-0.5">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-muted-foreground">Necessário</span>
+                                    <span className="font-medium text-foreground">{formatCurrency(needed)}/mês</span>
+                                  </div>
+                                  <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
+                                    <div
+                                      className="h-full rounded-full bg-primary transition-all"
+                                      style={{ width: `${neededPct}%` }}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="space-y-0.5">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-muted-foreground">Capacidade</span>
+                                    <span className="font-medium text-foreground">{formatCurrency(capVal)}/mês</span>
+                                  </div>
+                                  <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
+                                    <div
+                                      className={`h-full rounded-full transition-all ${capVal >= needed ? "bg-green-500" : capVal >= needed * 0.6 ? "bg-yellow-500" : "bg-red-500"}`}
+                                      style={{ width: `${capPct}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
+
+                      {/* Capacity text (when no perMonth for comparison) */}
+                      {capacity !== null && (calc.perMonth === null || calc.perMonth <= 0) && (
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                           <Wallet className="h-3 w-3" />
                           <span>Capacidade estimada: <span className="font-medium text-foreground">{formatCurrency(Math.max(capacity, 0))}/mês</span></span>
@@ -391,11 +450,11 @@ const Caixinha = () => {
                       {goal.responsible === "both" && calc.perMonth !== null && calc.perMonth > 0 && (
                         <div className="text-xs px-2.5 py-2 rounded-md bg-secondary/50 space-y-1">
                           <p className="text-muted-foreground">
-                            👥 Contribuição por pessoa: <span className="font-medium text-foreground">R$ {Math.round(calc.perMonth / 2)}/mês</span>
+                            👥 Contribuição por pessoa: <span className="font-medium text-foreground">{formatCurrency(Math.round(calc.perMonth / 2))}/mês</span>
                           </p>
                           {capacity !== null && capacity > 0 && (
                             <p className="text-muted-foreground">
-                              💰 Capacidade individual: <span className="font-medium text-foreground">R$ {Math.round(capacity / 2)}/mês</span>
+                              💰 Capacidade individual: <span className="font-medium text-foreground">{formatCurrency(Math.round(capacity / 2))}/mês</span>
                             </p>
                           )}
                         </div>
