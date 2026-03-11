@@ -14,12 +14,18 @@ import { toast } from "sonner";
 
 type ExtractedTransaction = {
   date: string;
+  originalDate: string;
   description: string;
   amount: number;
   category: string;
   installment_number?: number;
   total_installments?: number;
   selected: boolean;
+};
+
+type InvoiceMeta = {
+  invoice_year: number;
+  invoice_month: number;
 };
 
 type Props = {
