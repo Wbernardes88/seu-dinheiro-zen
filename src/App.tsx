@@ -14,6 +14,7 @@ import Categorias from "./pages/Categorias";
 import LimiteGastos from "./pages/LimiteGastos";
 import Caixinha from "./pages/Caixinha";
 import Desafio52Semanas from "./pages/Desafio52Semanas";
+import Cartoes from "./pages/Cartoes";
 import Auth from "./pages/Auth";
 import Documentacao from "./pages/Documentacao";
 import ResetPassword from "./pages/ResetPassword";
@@ -66,6 +67,7 @@ const App = () => (
                 <Route path="/limites" element={<LimiteGastos />} />
                 <Route path="/caixinha" element={<Caixinha />} />
                 <Route path="/desafio" element={<Desafio52Semanas />} />
+                <Route path="/cartoes" element={<Cartoes />} />
                 <Route path="/casal" element={<CoupleManage />} />
                 <Route path="/documentacao" element={<Documentacao />} />
               </Route>

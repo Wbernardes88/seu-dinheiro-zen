@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon, LogOut, Users, BookOpen, Menu, Volume2, VolumeX } from "lucide-react";
+import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon, LogOut, Users, BookOpen, Menu, Volume2, VolumeX, CreditCard } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSounds } from "@/contexts/SoundContext";
@@ -11,6 +11,7 @@ import { useState } from "react";
 const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Início" },
   { to: "/lancamentos", icon: Receipt, label: "Lançar" },
+  { to: "/cartoes", icon: CreditCard, label: "Cartões" },
   { to: "/categorias", icon: Tag, label: "Categorias" },
   { to: "/limites", icon: Gauge, label: "Limites" },
   { to: "/caixinha", icon: PiggyBank, label: "Caixinha" },

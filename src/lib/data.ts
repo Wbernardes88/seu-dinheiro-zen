@@ -11,6 +11,20 @@ export type Transaction = {
   isRecurring?: boolean;
   isFixed?: boolean;
   userId?: string;
+  creditCardId?: string;
+  installmentGroupId?: string;
+  installmentNumber?: number;
+  totalInstallments?: number;
+};
+
+export type CreditCard = {
+  id: string;
+  name: string;
+  brand: string;
+  color: string;
+  creditLimit: number;
+  closingDay: number;
+  dueDay: number;
 };
 
 export type Category = {

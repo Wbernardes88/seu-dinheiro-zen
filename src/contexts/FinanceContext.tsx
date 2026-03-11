@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { parseLocalDate } from "@/lib/data";
 import { useAuth } from "./AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import type { Transaction, Category, BudgetLimit, SavingsGoal } from "@/lib/data";
+import type { Transaction, Category, BudgetLimit, SavingsGoal, CreditCard } from "@/lib/data";
 
 type FinanceContextType = {
   transactions: Transaction[];
@@ -24,6 +24,11 @@ type FinanceContextType = {
   addSavingsGoal: (g: Omit<SavingsGoal, "id">) => void;
   updateSavingsGoal: (id: string, g: Partial<Omit<SavingsGoal, "id">>) => void;
   deleteSavingsGoal: (id: string) => void;
+
+  creditCards: CreditCard[];
+  addCreditCard: (c: Omit<CreditCard, "id">) => void;
+  updateCreditCard: (id: string, c: Partial<Omit<CreditCard, "id">>) => void;
+  deleteCreditCard: (id: string) => Promise<boolean>;
 
   challenge52Weeks: { week: number; amount: number; completed: boolean }[];
   toggleWeek: (week: number) => void;
@@ -46,6 +51,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [budgetLimitsRaw, setBudgetLimitsRaw] = useState<{ id: string; categoryId: string; category: string; budget: number }[]>([]);
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([]);
   const [weeks, setWeeks] = useState<{ week: number; amount: number; completed: boolean }[]>([]);
+  const [creditCards, setCreditCards] = useState<CreditCard[]>([]);
   const [loading, setLoading] = useState(true);
 
   // ---- FETCH ALL DATA ----
@@ -57,27 +63,27 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const fetchAll = async () => {
       setLoading(true);
-      const [txRes, catRes, blRes, sgRes, cwRes] = await Promise.all([
+      const [txRes, catRes, blRes, sgRes, cwRes, ccRes] = await Promise.all([
         supabase.from("transactions").select("*").eq("couple_id", coupleId).order("date", { ascending: false }),
         supabase.from("categories").select("*").eq("couple_id", coupleId),
         supabase.from("budget_limits").select("*").eq("couple_id", coupleId),
         supabase.from("savings_goals").select("*").eq("couple_id", coupleId),
         supabase.from("challenge_weeks").select("*").eq("couple_id", coupleId).order("week"),
+        supabase.from("credit_cards").select("*").eq("couple_id", coupleId),
       ]);
 
+      const mapTx = (t: any): Transaction => ({
+        id: t.id, date: t.date, type: t.type as "income" | "expense", category: t.category,
+        description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount),
+        isRecurring: t.is_recurring, isFixed: t.is_fixed, userId: t.user_id,
+        creditCardId: t.credit_card_id || undefined,
+        installmentGroupId: t.installment_group_id || undefined,
+        installmentNumber: t.installment_number || undefined,
+        totalInstallments: t.total_installments || undefined,
+      });
+
       if (txRes.data) {
-        setTransactions(txRes.data.map((t) => ({
-          id: t.id,
-          date: t.date,
-          type: t.type as "income" | "expense",
-          category: t.category,
-          description: t.description,
-          paymentMethod: t.payment_method,
-          amount: Number(t.amount),
-          isRecurring: t.is_recurring,
-          isFixed: t.is_fixed,
-          userId: t.user_id,
-        })));
+        setTransactions(txRes.data.map(mapTx));
       }
 
       if (catRes.data) {
@@ -118,6 +124,15 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         })));
       }
 
+      const mapCard = (c: any): CreditCard => ({
+        id: c.id, name: c.name, brand: c.brand, color: c.color,
+        creditLimit: Number(c.credit_limit), closingDay: c.closing_day, dueDay: c.due_day,
+      });
+
+      if (ccRes.data) {
+        setCreditCards(ccRes.data.map(mapCard));
+      }
+
       setLoading(false);
     };
 
@@ -128,9 +143,14 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       .channel(`couple-${coupleId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "transactions", filter: `couple_id=eq.${coupleId}` }, () => {
         supabase.from("transactions").select("*").eq("couple_id", coupleId).order("date", { ascending: false }).then(({ data }) => {
-          if (data) setTransactions(data.map((t) => ({
+          if (data) setTransactions(data.map((t: any) => ({
             id: t.id, date: t.date, type: t.type as "income" | "expense", category: t.category,
-            description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount), isRecurring: t.is_recurring, isFixed: t.is_fixed, userId: t.user_id,
+            description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount),
+            isRecurring: t.is_recurring, isFixed: t.is_fixed, userId: t.user_id,
+            creditCardId: t.credit_card_id || undefined,
+            installmentGroupId: t.installment_group_id || undefined,
+            installmentNumber: t.installment_number || undefined,
+            totalInstallments: t.total_installments || undefined,
           })));
         });
       })
@@ -154,6 +174,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
           if (data) setWeeks(data.map((w) => ({ week: w.week, amount: Number(w.amount), completed: w.completed })));
         });
       })
+      .on("postgres_changes", { event: "*", schema: "public", table: "credit_cards", filter: `couple_id=eq.${coupleId}` }, () => {
+        supabase.from("credit_cards").select("*").eq("couple_id", coupleId).then(({ data }) => {
+          if (data) setCreditCards(data.map((c: any) => ({ id: c.id, name: c.name, brand: c.brand, color: c.color, creditLimit: Number(c.credit_limit), closingDay: c.closing_day, dueDay: c.due_day })));
+        });
+      })
       .subscribe();
 
     return () => {
@@ -165,11 +190,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const addTransaction = useCallback(async (t: Omit<Transaction, "id">) => {
     if (!coupleId || !user) return;
 
-    const insertOne = async (data: Omit<Transaction, "id">) => {
+    const insertOne = async (data: Omit<Transaction, "id">, overrides?: { installment_group_id?: string; installment_number?: number; total_installments?: number; date?: string }) => {
       const result = await supabase.from("transactions").insert({
         couple_id: coupleId,
         user_id: user.id,
-        date: data.date,
+        date: overrides?.date || data.date,
         type: data.type,
         category: data.category,
         description: data.description,
@@ -177,6 +202,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         amount: data.amount,
         is_recurring: data.isRecurring || false,
         is_fixed: data.isFixed || false,
+        credit_card_id: data.creditCardId || null,
+        installment_group_id: overrides?.installment_group_id || data.installmentGroupId || null,
+        installment_number: overrides?.installment_number || data.installmentNumber || null,
+        total_installments: overrides?.total_installments || data.totalInstallments || null,
       });
       return result;
     };
@@ -188,7 +217,20 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return;
     }
 
-    if (t.isRecurring) {
+    // Handle installments for credit card purchases
+    if (t.totalInstallments && t.totalInstallments > 1 && t.creditCardId) {
+      const groupId = crypto.randomUUID();
+      // First installment already inserted above — update it with group info
+      // Actually re-insert with group info
+      // Delete the first one and re-insert all with group
+      // Simpler: the first insert already has group info if we set it
+      const baseDate = parseLocalDate(t.date);
+      for (let i = 1; i < t.totalInstallments; i++) {
+        const nextDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, Math.min(baseDate.getDate(), new Date(baseDate.getFullYear(), baseDate.getMonth() + i + 1, 0).getDate()));
+        const dateStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, "0")}-${String(nextDate.getDate()).padStart(2, "0")}`;
+        await insertOne(t, { date: dateStr, installment_group_id: t.installmentGroupId || groupId, installment_number: i + 1, total_installments: t.totalInstallments });
+      }
+    } else if (t.isRecurring) {
       const baseDate = parseLocalDate(t.date);
       for (let i = 1; i <= 11; i++) {
         const nextDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, Math.min(baseDate.getDate(), new Date(baseDate.getFullYear(), baseDate.getMonth() + i + 1, 0).getDate()));
@@ -200,9 +242,14 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     // Manual refetch as fallback in case realtime doesn't trigger
     const { data } = await supabase.from("transactions").select("*").eq("couple_id", coupleId).order("date", { ascending: false });
     if (data) {
-      setTransactions(data.map((t) => ({
+      setTransactions(data.map((t: any) => ({
         id: t.id, date: t.date, type: t.type as "income" | "expense", category: t.category,
-        description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount), isRecurring: t.is_recurring, isFixed: t.is_fixed, userId: t.user_id,
+        description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount),
+        isRecurring: t.is_recurring, isFixed: t.is_fixed, userId: t.user_id,
+        creditCardId: t.credit_card_id || undefined,
+        installmentGroupId: t.installment_group_id || undefined,
+        installmentNumber: t.installment_number || undefined,
+        totalInstallments: t.total_installments || undefined,
       })));
     }
   }, [coupleId, user]);
@@ -230,17 +277,14 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       if (!refetchError && data) {
         setTransactions(
-          data.map((t) => ({
-            id: t.id,
-            date: t.date,
-            type: t.type as "income" | "expense",
-            category: t.category,
-            description: t.description,
-            paymentMethod: t.payment_method,
-            amount: Number(t.amount),
-            isRecurring: t.is_recurring,
-            isFixed: t.is_fixed,
-            userId: t.user_id,
+          data.map((t: any) => ({
+            id: t.id, date: t.date, type: t.type as "income" | "expense", category: t.category,
+            description: t.description, paymentMethod: t.payment_method, amount: Number(t.amount),
+            isRecurring: t.is_recurring, isFixed: t.is_fixed, userId: t.user_id,
+            creditCardId: t.credit_card_id || undefined,
+            installmentGroupId: t.installment_group_id || undefined,
+            installmentNumber: t.installment_number || undefined,
+            totalInstallments: t.total_installments || undefined,
           }))
         );
       }
@@ -341,6 +385,41 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await supabase.from("savings_goals").delete().eq("id", id);
   }, []);
 
+  // ---- CREDIT CARDS ----
+  const addCreditCard = useCallback(async (c: Omit<CreditCard, "id">) => {
+    if (!coupleId) return;
+    await supabase.from("credit_cards").insert({
+      couple_id: coupleId,
+      name: c.name,
+      brand: c.brand,
+      color: c.color,
+      credit_limit: c.creditLimit,
+      closing_day: c.closingDay,
+      due_day: c.dueDay,
+    });
+  }, [coupleId]);
+
+  const updateCreditCard = useCallback(async (id: string, c: Partial<Omit<CreditCard, "id">>) => {
+    await supabase.from("credit_cards").update({
+      ...(c.name !== undefined && { name: c.name }),
+      ...(c.brand !== undefined && { brand: c.brand }),
+      ...(c.color !== undefined && { color: c.color }),
+      ...(c.creditLimit !== undefined && { credit_limit: c.creditLimit }),
+      ...(c.closingDay !== undefined && { closing_day: c.closingDay }),
+      ...(c.dueDay !== undefined && { due_day: c.dueDay }),
+    }).eq("id", id);
+  }, []);
+
+  const deleteCreditCard = useCallback(async (id: string) => {
+    const { error } = await supabase.from("credit_cards").delete().eq("id", id);
+    if (error) {
+      console.error("deleteCreditCard error:", error);
+      toast.error("Erro ao remover cartão.");
+      return false;
+    }
+    return true;
+  }, []);
+
   // ---- CHALLENGE 52 WEEKS ----
   const toggleWeek = useCallback(async (week: number) => {
     if (!coupleId) return;
@@ -433,6 +512,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         addSavingsGoal,
         updateSavingsGoal,
         deleteSavingsGoal,
+        creditCards,
+        addCreditCard,
+        updateCreditCard,
+        deleteCreditCard,
         challenge52Weeks: weeks,
         toggleWeek,
         loading,

@@ -19,7 +19,7 @@ const getLocalDateStr = () => {
 };
 
 const Lancamentos = () => {
-  const { transactions, addTransaction, deleteTransaction, updateTransaction, categories } = useFinance();
+  const { transactions, addTransaction, deleteTransaction, updateTransaction, categories, creditCards } = useFinance();
   const { coupleMembers } = useAuth();
   const { play } = useSounds();
 
@@ -39,6 +39,8 @@ const Lancamentos = () => {
   const [isRecurring, setIsRecurring] = useState(false);
   const [isFixed, setIsFixed] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [selectedCardId, setSelectedCardId] = useState("");
+  const [installments, setInstallments] = useState("1");
 
   // Filter state
   const now = new Date();
@@ -66,25 +68,42 @@ const Lancamentos = () => {
       toast.error("Preencha todos os campos");
       return;
     }
+    if (paymentMethod === "Cartão crédito" && creditCards.length > 0 && !selectedCardId) {
+      toast.error("Selecione um cartão de crédito");
+      return;
+    }
     setIsSubmitting(true);
     const wasRecurring = isRecurring;
+    const numInstallments = parseInt(installments) || 1;
+    const installmentAmount = numInstallments > 1 ? Math.round((parseFloat(amount) / numInstallments) * 100) / 100 : parseFloat(amount);
+    const groupId = numInstallments > 1 ? crypto.randomUUID() : undefined;
+
     addTransaction({
       date,
       type,
       category,
-      description,
+      description: numInstallments > 1 ? `${description} (1/${numInstallments})` : description,
       paymentMethod,
-      amount: parseFloat(amount),
+      amount: installmentAmount,
       isRecurring,
       isFixed,
+      creditCardId: paymentMethod === "Cartão crédito" && selectedCardId ? selectedCardId : undefined,
+      installmentGroupId: groupId,
+      installmentNumber: numInstallments > 1 ? 1 : undefined,
+      totalInstallments: numInstallments > 1 ? numInstallments : undefined,
     });
     setDescription("");
     setAmount("");
     setCategory("");
     setPaymentMethod("");
+    setSelectedCardId("");
+    setInstallments("1");
     setIsRecurring(false);
     setIsFixed(false);
-    toast.success(wasRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!");
+    const msg = numInstallments > 1 
+      ? `Compra parcelada em ${numInstallments}x de ${formatCurrency(installmentAmount)}!`
+      : wasRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!";
+    toast.success(msg);
     play(type === "income" ? "kaching" : "swoosh");
     setTimeout(() => setIsSubmitting(false), 500);
   };
@@ -149,6 +168,41 @@ const Lancamentos = () => {
             </Select>
           </div>
         </div>
+
+        {/* Credit card & installments (conditional) */}
+        {paymentMethod === "Cartão crédito" && creditCards.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Cartão</Label>
+              <Select value={selectedCardId} onValueChange={setSelectedCardId}>
+                <SelectTrigger><SelectValue placeholder="Selecione o cartão" /></SelectTrigger>
+                <SelectContent>
+                  {creditCards.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      <div className="flex items-center gap-2">
+                        <div className="h-3 w-3 rounded-full" style={{ background: c.color }} />
+                        {c.name} ({c.brand})
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Parcelas</Label>
+              <Select value={installments} onValueChange={setInstallments}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
+                    <SelectItem key={n} value={n.toString()}>
+                      {n}x {amount ? `de ${formatCurrency(parseFloat(amount) / n)}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-1.5">
           <Label className="text-xs">Valor (R$)</Label>
