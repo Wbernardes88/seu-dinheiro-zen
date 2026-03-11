@@ -524,6 +524,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         deleteCreditCard,
         challenge52Weeks: weeks,
         toggleWeek,
+        refreshTransactions,
         loading,
       }}
     >
