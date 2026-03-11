@@ -379,6 +379,15 @@ const Cartoes = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Invoice Import Dialog */}
+      {activeCard && (
+        <InvoiceImportDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          card={activeCard}
+        />
+      )}
     </div>
   );
 };
