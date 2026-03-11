@@ -293,28 +293,26 @@ const Caixinha = () => {
               : getViability(capacity, calc.perMonth);
             return (
               <div key={goal.id} className="card-glass p-4 space-y-3 group">
-                {/* Header with viability badge */}
+                {/* Header */}
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{goal.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-1.5">
+                    <div className="flex items-center justify-between">
                       <h3 className="text-sm font-semibold text-foreground truncate">{goal.name}</h3>
-                      <div className="flex items-center gap-1">
-                        {calc.perMonth !== null && (
-                          <Badge className={`text-[10px] px-1.5 py-0 h-5 font-medium ${viabilityColors[viability.level]}`}>
-                            {viabilityIcons[viability.level]} {viability.label}
-                          </Badge>
-                        )}
-                        <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(goal)}>
-                            <Pencil className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-expense" onClick={() => { deleteSavingsGoal(goal.id); toast.success("Meta removida!"); }}>
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
+                      <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(goal)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-expense" onClick={() => { deleteSavingsGoal(goal.id); toast.success("Meta removida!"); }}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
                     </div>
+                    {calc.perMonth !== null && (
+                      <Badge className={`text-[10px] px-1.5 py-0 h-5 font-medium mt-1 ${viabilityColors[viability.level]}`}>
+                        {viabilityIcons[viability.level]} {viability.label}
+                      </Badge>
+                    )}
                   </div>
                 </div>
 
