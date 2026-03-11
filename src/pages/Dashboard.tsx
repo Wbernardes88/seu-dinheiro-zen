@@ -278,7 +278,9 @@ const Dashboard = () => {
       {/* Balance evolution */}
       <BalanceEvolutionChart month={month} year={year} />
 
-      {/* Goals & Challenge widgets */}
+      {/* Credit cards & Goals & Challenge widgets */}
+      <CreditCardWidget />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <SavingsGoalsWidget />
         <ChallengeWidget />

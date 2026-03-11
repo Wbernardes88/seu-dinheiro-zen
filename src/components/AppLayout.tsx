@@ -11,6 +11,7 @@ import { useState } from "react";
 const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Início" },
   { to: "/lancamentos", icon: Receipt, label: "Lançar" },
+  { to: "/cartoes", icon: CreditCard, label: "Cartões" },
   { to: "/categorias", icon: Tag, label: "Categorias" },
   { to: "/limites", icon: Gauge, label: "Limites" },
   { to: "/caixinha", icon: PiggyBank, label: "Caixinha" },
