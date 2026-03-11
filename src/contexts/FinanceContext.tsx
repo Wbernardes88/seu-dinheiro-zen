@@ -217,7 +217,20 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return;
     }
 
-    if (t.isRecurring) {
+    // Handle installments for credit card purchases
+    if (t.totalInstallments && t.totalInstallments > 1 && t.creditCardId) {
+      const groupId = crypto.randomUUID();
+      // First installment already inserted above — update it with group info
+      // Actually re-insert with group info
+      // Delete the first one and re-insert all with group
+      // Simpler: the first insert already has group info if we set it
+      const baseDate = parseLocalDate(t.date);
+      for (let i = 1; i < t.totalInstallments; i++) {
+        const nextDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, Math.min(baseDate.getDate(), new Date(baseDate.getFullYear(), baseDate.getMonth() + i + 1, 0).getDate()));
+        const dateStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, "0")}-${String(nextDate.getDate()).padStart(2, "0")}`;
+        await insertOne(t, { date: dateStr, installment_group_id: t.installmentGroupId || groupId, installment_number: i + 1, total_installments: t.totalInstallments });
+      }
+    } else if (t.isRecurring) {
       const baseDate = parseLocalDate(t.date);
       for (let i = 1; i <= 11; i++) {
         const nextDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, Math.min(baseDate.getDate(), new Date(baseDate.getFullYear(), baseDate.getMonth() + i + 1, 0).getDate()));
