@@ -13,6 +13,7 @@ import { toast } from "sonner";
 
 const LimiteGastos = () => {
   const { budgetLimits, setBudgetLimit, deleteBudgetLimit, categories } = useFinance();
+  const { play } = useSounds();
   const expCats = categories.filter((c) => c.type === "expense");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCatId, setEditingCatId] = useState("");
