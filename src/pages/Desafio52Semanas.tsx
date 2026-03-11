@@ -11,6 +11,7 @@ import { toast } from "sonner";
 const Desafio52Semanas = () => {
   const { challenge52Weeks, toggleWeek } = useFinance();
   const { coupleId } = useAuth();
+  const { play } = useSounds();
 
   const defaultGoal = challenge52Weeks.reduce((s, w) => s + w.amount, 0);
   const [customGoal, setCustomGoal] = useState<number | null>(null);
