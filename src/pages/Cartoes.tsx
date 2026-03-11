@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, CreditCard as CreditCardIcon, Calendar, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Pencil, Trash2, CreditCard as CreditCardIcon, Calendar, AlertTriangle, ChevronLeft, ChevronRight, FileUp } from "lucide-react";
 import { toast } from "sonner";
+import InvoiceImportDialog from "@/components/cartoes/InvoiceImportDialog";
 
 const brands = ["Visa", "Mastercard", "Elo", "Amex", "Hipercard", "Outro"];
 const cardColors = [
