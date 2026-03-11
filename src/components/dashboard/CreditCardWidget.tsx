@@ -11,30 +11,17 @@ const CreditCardWidget = () => {
 
   const cardData = useMemo(() => {
     return creditCards.map((card) => {
-      // Calculate invoice period based on closing day
-      const closingDay = card.closingDay;
-      const currentDay = now.getDate();
-      
-      // If we're past closing day, current invoice period is: closingDay of this month to closingDay of next month
-      // If we're before/on closing day, current invoice period is: closingDay of last month to closingDay of this month
-      let periodStart: Date;
-      let periodEnd: Date;
-      
-      if (currentDay > closingDay) {
-        // Last closed invoice: from closingDay+1 of previous month to closingDay of this month
-        periodStart = new Date(now.getFullYear(), now.getMonth() - 1, closingDay + 1);
-        periodEnd = new Date(now.getFullYear(), now.getMonth(), closingDay);
-      } else {
-        // Last closed invoice: from closingDay+1 of 2 months ago to closingDay of last month
-        periodStart = new Date(now.getFullYear(), now.getMonth() - 2, closingDay + 1);
-        periodEnd = new Date(now.getFullYear(), now.getMonth() - 1, closingDay);
-      }
+
+      // Since imported invoices use the invoice month as transaction date,
+      // simply filter by current month/year
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
 
       const spent = transactions
         .filter((t) => {
           if (t.creditCardId !== card.id || t.type !== "expense") return false;
           const d = parseLocalDate(t.date);
-          return d >= periodStart && d <= periodEnd;
+          return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
         })
         .reduce((sum, t) => sum + t.amount, 0);
 
@@ -66,7 +53,7 @@ const CreditCardWidget = () => {
                 <span className="text-xs font-medium text-foreground">{card.name}</span>
               </div>
               <span className="text-xs text-muted-foreground">
-                {formatCurrency(card.spent)} / {formatCurrency(card.creditLimit)}
+                {formatCurrency(card.spent)} de {formatCurrency(card.creditLimit)}
               </span>
             </div>
             <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
@@ -78,7 +65,7 @@ const CreditCardWidget = () => {
               />
             </div>
             <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-              <span>Fatura: {Math.round(card.usagePct)}%</span>
+              <span>Fatura atual: {Math.round(card.usagePct)}%</span>
               <span className="flex items-center gap-1">
                 <Calendar className="h-2.5 w-2.5" />
                 Vence dia {card.dueDay}

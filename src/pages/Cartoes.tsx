@@ -25,17 +25,7 @@ const cardColors = [
   { label: "Preto", value: "#1a1a1a" },
 ];
 
-function getInvoicePeriod(closingDay: number, month: number, year: number) {
-  // Invoice period: from closing day of previous month to closing day of current month
-  let startMonth = month - 1;
-  let startYear = year;
-  if (startMonth < 0) { startMonth = 11; startYear--; }
-  
-  const startDate = new Date(startYear, startMonth, closingDay + 1);
-  const endDate = new Date(year, month, closingDay);
-  
-  return { startDate, endDate };
-}
+// Invoice period calculation removed - now using calendar month matching
 
 function getBestPurchaseInfo(closingDay: number) {
   const today = new Date();
@@ -125,38 +115,26 @@ const Cartoes = () => {
   };
 
   // Get invoice transactions for a specific card/month
+  // Since imported transactions use the invoice month's closing day as date,
+  // we filter by matching year-month of the transaction date
   const getCardInvoice = (card: CreditCard) => {
-    const { startDate, endDate } = getInvoicePeriod(card.closingDay, invoiceMonth, invoiceYear);
     return transactions.filter((t) => {
       if (t.creditCardId !== card.id) return false;
       const d = parseLocalDate(t.date);
-      return d >= startDate && d <= endDate;
+      return d.getMonth() === invoiceMonth && d.getFullYear() === invoiceYear;
     });
   };
 
-  // Current invoice period spending per card (based on closing day, not calendar month)
+  // Current invoice spending: filter by current month
   const getCardInvoiceSpending = (card: CreditCard) => {
-    const closingDay = card.closingDay;
-    const currentDay = now.getDate();
-    
-    let periodStart: Date;
-    let periodEnd: Date;
-    
-    if (currentDay > closingDay) {
-      // Last closed invoice: closingDay+1 of prev month to closingDay of this month
-      periodStart = new Date(now.getFullYear(), now.getMonth() - 1, closingDay + 1);
-      periodEnd = new Date(now.getFullYear(), now.getMonth(), closingDay);
-    } else {
-      // Last closed invoice: closingDay+1 of 2 months ago to closingDay of last month
-      periodStart = new Date(now.getFullYear(), now.getMonth() - 2, closingDay + 1);
-      periodEnd = new Date(now.getFullYear(), now.getMonth() - 1, closingDay);
-    }
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
 
     return transactions
       .filter((t) => {
         if (t.creditCardId !== card.id || t.type !== "expense") return false;
         const d = parseLocalDate(t.date);
-        return d >= periodStart && d <= periodEnd;
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
       })
       .reduce((sum, t) => sum + t.amount, 0);
   };
@@ -228,7 +206,7 @@ const Cartoes = () => {
                 {/* Limit usage */}
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-xs">
-                    <span className="text-white/70">Usado: {formatCurrency(spent)}</span>
+                    <span className="text-white/70">Fatura atual: {formatCurrency(spent)}</span>
                     <span className="text-white/70">Limite: {formatCurrency(card.creditLimit)}</span>
                   </div>
                   <div className="h-2 bg-white/20 rounded-full overflow-hidden">
