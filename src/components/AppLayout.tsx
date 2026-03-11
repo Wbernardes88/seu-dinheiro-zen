@@ -32,10 +32,12 @@ const AppLayout = () => {
     <div className="min-h-screen bg-background flex">
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-60 border-r bg-card p-4 gap-1 fixed h-full">
-        <div className="flex items-center gap-2 px-3 py-4 mb-4">
-          <img src={logo} alt="FinançasJá" className="h-8 w-8 rounded-lg object-contain shrink-0" />
-          <span className="font-semibold text-lg text-foreground truncate min-w-0">FinançasJá</span>
-          <div className="flex items-center gap-0.5 shrink-0 ml-auto">
+        <div className="flex flex-col gap-2 px-3 py-4 mb-4">
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="FinançasJá" className="h-8 w-8 rounded-lg object-contain shrink-0" />
+            <span className="font-semibold text-lg text-foreground">FinançasJá</span>
+          </div>
+          <div className="flex items-center gap-0.5">
             <Button
               variant="ghost"
               size="icon"
