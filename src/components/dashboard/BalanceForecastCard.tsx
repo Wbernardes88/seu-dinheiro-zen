@@ -20,16 +20,18 @@ const BalanceForecastCard = ({ month, year }: Props) => {
       return d.getMonth() === month && d.getFullYear() === year;
     });
 
-    const totalIncome = filtered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
-    const totalExpense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+    // Exclude credit card transactions — they don't affect cash balance until invoice is paid
+    const cashFiltered = filtered.filter((t) => !t.creditCardId);
+    const totalIncome = cashFiltered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+    const totalExpense = cashFiltered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
 
     if (!isCurrentMonth) {
       return { predicted: totalIncome - totalExpense, daysLeft: 0, dailyAvg: 0, isProjection: false, dailyReduction: 0, fixedExpense: 0, variableExpense: 0 };
     }
 
-    // Separate fixed (recurring) and variable expenses
-    const fixedExpense = filtered.filter((t) => t.type === "expense" && t.isFixed).reduce((s, t) => s + t.amount, 0);
-    const variableExpense = filtered.filter((t) => t.type === "expense" && !t.isFixed).reduce((s, t) => s + t.amount, 0);
+    // Separate fixed (recurring) and variable expenses (cash only)
+    const fixedExpense = cashFiltered.filter((t) => t.type === "expense" && t.isFixed).reduce((s, t) => s + t.amount, 0);
+    const variableExpense = cashFiltered.filter((t) => t.type === "expense" && !t.isFixed).reduce((s, t) => s + t.amount, 0);
 
     const dayOfMonth = now.getDate();
     const daysInMonth = new Date(year, month + 1, 0).getDate();

@@ -49,18 +49,25 @@ const Dashboard = () => {
     });
   }, [transactions, month, year]);
 
-  const totalIncome = filtered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
-  const totalExpense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+  // Separate cash vs credit card transactions
+  const cashFiltered = filtered.filter((t) => !t.creditCardId);
+  const creditCardFiltered = filtered.filter((t) => !!t.creditCardId);
+
+  const totalIncome = cashFiltered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  const totalExpense = cashFiltered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   const balance = totalIncome - totalExpense;
 
-  // Previous month data for comparison
+  // Pending credit card debt for the period
+  const pendingCreditCard = creditCardFiltered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+
+  // Previous month data for comparison (also excluding credit card)
   const prevMonthData = useMemo(() => {
     let pm = month - 1;
     let py = year;
     if (pm < 0) { pm = 11; py--; }
     const prev = transactions.filter((t) => {
       const d = parseLocalDate(t.date);
-      return d.getMonth() === pm && d.getFullYear() === py;
+      return d.getMonth() === pm && d.getFullYear() === py && !t.creditCardId;
     });
     const inc = prev.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
     const exp = prev.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
@@ -79,8 +86,8 @@ const Dashboard = () => {
       let m = month - i;
       let y = year;
       while (m < 0) { m += 12; y--; }
-      const inc = transactions.filter(t => { const d = parseLocalDate(t.date); return t.type === "income" && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
-      const exp = transactions.filter(t => { const d = parseLocalDate(t.date); return t.type === "expense" && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
+      const inc = transactions.filter(t => { const d = parseLocalDate(t.date); return t.type === "income" && !t.creditCardId && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
+      const exp = transactions.filter(t => { const d = parseLocalDate(t.date); return t.type === "expense" && !t.creditCardId && d.getMonth() === m && d.getFullYear() === y; }).reduce((s, t) => s + t.amount, 0);
       data.push({ name: shortMonthLabels[m], entradas: inc, saidas: exp });
     }
     return data;
@@ -158,6 +165,8 @@ const Dashboard = () => {
           colorClass="text-foreground"
           bgClass="bg-primary/10"
           comparison={balanceComparison}
+          subtitle={pendingCreditCard > 0 ? `Faturas pendentes: -${formatCurrency(pendingCreditCard)}` : undefined}
+          subtitleValue={pendingCreditCard > 0 ? `Líquido: ${formatCurrency(balance - pendingCreditCard)}` : undefined}
         />
         <SummaryCard
           icon={<TrendingUp className="h-6 w-6 text-income" />}
@@ -175,6 +184,7 @@ const Dashboard = () => {
           bgClass="bg-expense/10"
           comparison={expenseComparison}
           invertComparison
+          subtitle={pendingCreditCard > 0 ? `+ ${formatCurrency(pendingCreditCard)} no cartão` : undefined}
         />
       </div>
 
@@ -326,7 +336,7 @@ const Dashboard = () => {
 };
 
 const SummaryCard = ({
-  icon, label, value, colorClass, bgClass, comparison, invertComparison,
+  icon, label, value, colorClass, bgClass, comparison, invertComparison, subtitle, subtitleValue,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -335,6 +345,8 @@ const SummaryCard = ({
   bgClass: string;
   comparison?: number | null;
   invertComparison?: boolean;
+  subtitle?: string;
+  subtitleValue?: string;
 }) => {
   const isPositive = invertComparison ? (comparison ?? 0) <= 0 : (comparison ?? 0) >= 0;
 
@@ -354,6 +366,16 @@ const SummaryCard = ({
                 {comparison > 0 ? "+" : ""}{comparison}% vs mês anterior
               </span>
             </div>
+          )}
+          {subtitle && (
+            <p className="text-[10px] text-muted-foreground mt-1">
+              💳 {subtitle}
+            </p>
+          )}
+          {subtitleValue && (
+            <p className="text-[10px] font-medium text-expense mt-0.5">
+              {subtitleValue}
+            </p>
           )}
         </div>
       </div>
