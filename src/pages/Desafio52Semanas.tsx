@@ -95,7 +95,7 @@ const Desafio52Semanas = () => {
           {scaledWeeks.map((w) => (
             <button
               key={w.week}
-              onClick={() => toggleWeek(w.week)}
+              onClick={() => { toggleWeek(w.week); play(w.completed ? "tap" : "success"); }}
               className={`flex flex-col items-center p-2 rounded-lg text-xs transition-colors cursor-pointer ${
                 w.completed ? "bg-accent text-accent-foreground" : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
               }`}
