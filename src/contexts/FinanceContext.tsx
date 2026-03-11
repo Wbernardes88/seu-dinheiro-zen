@@ -174,6 +174,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
           if (data) setWeeks(data.map((w) => ({ week: w.week, amount: Number(w.amount), completed: w.completed })));
         });
       })
+      .on("postgres_changes", { event: "*", schema: "public", table: "credit_cards", filter: `couple_id=eq.${coupleId}` }, () => {
+        supabase.from("credit_cards").select("*").eq("couple_id", coupleId).then(({ data }) => {
+          if (data) setCreditCards(data.map((c: any) => ({ id: c.id, name: c.name, brand: c.brand, color: c.color, creditLimit: Number(c.credit_limit), closingDay: c.closing_day, dueDay: c.due_day })));
+        });
+      })
       .subscribe();
 
     return () => {
