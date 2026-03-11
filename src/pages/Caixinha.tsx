@@ -299,9 +299,7 @@ const Caixinha = () => {
             })() : null;
 
             const hasAdvancedInfo = (capacity !== null && calc.pct < 100) ||
-              (calc.perWeek !== null) ||
-              (goal.responsible === "both" && calc.perMonth !== null && calc.perMonth > 0 && calc.pct < 100) ||
-              smartMsgs.length > 0;
+              (goal.responsible === "both" && calc.perMonth !== null && calc.perMonth > 0 && calc.pct < 100);
 
             return (
               <div key={goal.id} className="card-glass p-4 space-y-3 group">
