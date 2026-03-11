@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSounds } from "@/contexts/SoundContext";
-import { formatCurrency } from "@/lib/data";
+import { formatCurrency, getInvoiceDateStr1Based } from "@/lib/data";
 import type { CreditCard, Category } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";

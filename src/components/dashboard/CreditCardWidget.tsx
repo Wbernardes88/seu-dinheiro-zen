@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
-import { formatCurrency, parseLocalDate } from "@/lib/data";
+import { formatCurrency, parseLocalDate, getCurrentInvoicePeriod } from "@/lib/data";
 import { CreditCard, Calendar, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -11,17 +11,14 @@ const CreditCardWidget = () => {
 
   const cardData = useMemo(() => {
     return creditCards.map((card) => {
-
-      // Since imported invoices use the invoice month as transaction date,
-      // simply filter by current month/year
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
+      // Use billing cycle to determine which month's invoice is "current"
+      const { month: invoiceMonth, year: invoiceYear } = getCurrentInvoicePeriod(card.closingDay, now);
 
       const spent = transactions
         .filter((t) => {
           if (t.creditCardId !== card.id || t.type !== "expense") return false;
           const d = parseLocalDate(t.date);
-          return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+          return d.getMonth() === invoiceMonth && d.getFullYear() === invoiceYear;
         })
         .reduce((sum, t) => sum + t.amount, 0);
 

@@ -125,16 +125,15 @@ const Cartoes = () => {
     });
   };
 
-  // Current invoice spending: filter by current month
+  // Current invoice spending: filter by card's billing cycle month
   const getCardInvoiceSpending = (card: CreditCard) => {
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
+    const { month: invMonth, year: invYear } = getCurrentInvoicePeriod(card.closingDay, now);
 
     return transactions
       .filter((t) => {
         if (t.creditCardId !== card.id || t.type !== "expense") return false;
         const d = parseLocalDate(t.date);
-        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+        return d.getMonth() === invMonth && d.getFullYear() === invYear;
       })
       .reduce((sum, t) => sum + t.amount, 0);
   };
