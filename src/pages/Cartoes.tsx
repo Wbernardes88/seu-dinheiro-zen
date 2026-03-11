@@ -125,38 +125,26 @@ const Cartoes = () => {
   };
 
   // Get invoice transactions for a specific card/month
+  // Since imported transactions use the invoice month's closing day as date,
+  // we filter by matching year-month of the transaction date
   const getCardInvoice = (card: CreditCard) => {
-    const { startDate, endDate } = getInvoicePeriod(card.closingDay, invoiceMonth, invoiceYear);
     return transactions.filter((t) => {
       if (t.creditCardId !== card.id) return false;
       const d = parseLocalDate(t.date);
-      return d >= startDate && d <= endDate;
+      return d.getMonth() === invoiceMonth && d.getFullYear() === invoiceYear;
     });
   };
 
-  // Current invoice period spending per card (based on closing day, not calendar month)
+  // Current invoice spending: filter by current month
   const getCardInvoiceSpending = (card: CreditCard) => {
-    const closingDay = card.closingDay;
-    const currentDay = now.getDate();
-    
-    let periodStart: Date;
-    let periodEnd: Date;
-    
-    if (currentDay > closingDay) {
-      // Last closed invoice: closingDay+1 of prev month to closingDay of this month
-      periodStart = new Date(now.getFullYear(), now.getMonth() - 1, closingDay + 1);
-      periodEnd = new Date(now.getFullYear(), now.getMonth(), closingDay);
-    } else {
-      // Last closed invoice: closingDay+1 of 2 months ago to closingDay of last month
-      periodStart = new Date(now.getFullYear(), now.getMonth() - 2, closingDay + 1);
-      periodEnd = new Date(now.getFullYear(), now.getMonth() - 1, closingDay);
-    }
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
 
     return transactions
       .filter((t) => {
         if (t.creditCardId !== card.id || t.type !== "expense") return false;
         const d = parseLocalDate(t.date);
-        return d >= periodStart && d <= periodEnd;
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
       })
       .reduce((sum, t) => sum + t.amount, 0);
   };
