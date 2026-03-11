@@ -70,7 +70,8 @@ Analise o PDF da fatura e extraia ABSOLUTAMENTE TODOS os lançamentos, sem exce�
 REGRAS IMPORTANTES:
 - Extraia TODOS os lançamentos: compras, saques, serviços (PIX, etc), débitos diversos, e OBRIGATORIAMENTE IOF.
 - IOF (Imposto sobre Operações Financeiras): SEMPRE extraia TODAS as linhas de IOF, incluindo "IOF DIAR", "IOF ADIC", "IOF ROT", etc. Mesmo que o valor seja centavos (ex: R$ 0,08), DEVE ser extraído. Use a data de referência do IOF ou a data mais próxima disponível. Categoria: "Taxas" ou a mais próxima do usuário.
-- NÃO inclua APENAS: pagamentos efetuados (linhas com "PAGTO", "PAGAMENTO", valores negativos), encargos rotativos, juros de mora, multas, tarifas de anuidade.
+- NÃO inclua: pagamentos efetuados à operadora (linhas como "PAGAMENTO EFETUADO", "PGTO DÉBITO AUTOMÁTICO", créditos/valores negativos), encargos rotativos, juros de mora, multas, tarifas de anuidade.
+- INCLUA SIM: Parcelamento de fatura anterior (ex: "PAGTO. PARCEL", "PARCELAMENTO FATURA", "PARC FATURA"). Esses são DÉBITOS reais que o cliente deve pagar, NÃO são pagamentos efetuados. Extraia como lançamento normal com a categoria mais adequada (ex: "Outros" ou "Taxas") e identifique as parcelas (installment_number/total_installments).
 - Seções como "Débitos diversos", "Compras Diversas", "Companhias Aéreas" são AGRUPAMENTOS — extraia cada lançamento individual dentro dessas seções.
 - Para cada lançamento extraia: data (DD/MM), descrição do estabelecimento, valor em R$, e categoria sugerida.
 - Se o lançamento tiver indicação de parcela (ex: "PARC 01/03" ou "01/03"), extraia installment_number e total_installments.
