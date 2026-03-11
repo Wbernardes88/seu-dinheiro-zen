@@ -411,14 +411,19 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const deleteCreditCard = useCallback(async (id: string) => {
+    const previousCards = creditCards;
+    // Optimistic removal
+    setCreditCards((prev) => prev.filter((c) => c.id !== id));
+
     const { error } = await supabase.from("credit_cards").delete().eq("id", id);
     if (error) {
       console.error("deleteCreditCard error:", error);
+      setCreditCards(previousCards); // rollback
       toast.error("Erro ao remover cartão.");
       return false;
     }
     return true;
-  }, []);
+  }, [creditCards]);
 
   // ---- CHALLENGE 52 WEEKS ----
   const toggleWeek = useCallback(async (week: number) => {
