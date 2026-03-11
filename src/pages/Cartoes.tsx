@@ -190,7 +190,7 @@ const Cartoes = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {creditCards.map((card) => {
-            const spent = getCardMonthSpending(card.id);
+            const spent = getCardInvoiceSpending(card);
             const usagePct = card.creditLimit > 0 ? Math.min((spent / card.creditLimit) * 100, 100) : 0;
             const purchaseInfo = getBestPurchaseInfo(card.closingDay);
 
