@@ -1,16 +1,17 @@
 import { useState, useMemo } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { formatCurrency } from "@/lib/data";
+import { formatCurrency, parseLocalDate } from "@/lib/data";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, TrendingUp, Calendar, Target, Users } from "lucide-react";
+import { Plus, Pencil, Trash2, TrendingUp, Calendar, Target, Users, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import type { SavingsGoal } from "@/lib/data";
+import type { SavingsGoal, Transaction } from "@/lib/data";
 
 function getGoalCalculations(goal: SavingsGoal) {
   const remaining = Math.max(goal.target - goal.current, 0);
@@ -102,8 +103,86 @@ function getSmartMessages(goal: SavingsGoal): { text: string; color: string }[] 
   return messages;
 }
 
+// Calculate monthly savings capacity from transactions
+function getSavingsCapacity(
+  transactions: Transaction[],
+  responsible: string | undefined,
+  coupleMembers: { userId: string; nickname: string; displayName: string }[]
+): number | null {
+  if (transactions.length === 0) return null;
+
+  const now = new Date();
+  // Use last 3 months of data for a more stable average
+  const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+
+  let filtered = transactions.filter((t) => {
+    const d = parseLocalDate(t.date);
+    return d >= threeMonthsAgo && d <= now;
+  });
+
+  // Filter by responsible person
+  if (responsible && responsible !== "both") {
+    filtered = filtered.filter((t) => t.userId === responsible);
+  }
+
+  const income = filtered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  const expense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+
+  // Calculate months in range
+  const monthsInRange = Math.max(
+    (now.getFullYear() - threeMonthsAgo.getFullYear()) * 12 + (now.getMonth() - threeMonthsAgo.getMonth()),
+    1
+  );
+
+  const monthlyCapacity = Math.round((income - expense) / monthsInRange);
+  return monthlyCapacity;
+}
+
+type ViabilityLevel = "viable" | "attention" | "aggressive";
+
+function getViability(capacity: number | null, perMonth: number | null): { level: ViabilityLevel; label: string; message: string } {
+  if (capacity === null || perMonth === null || perMonth <= 0) {
+    return { level: "viable", label: "Sem dados suficientes", message: "Adicione lançamentos para análise de viabilidade." };
+  }
+
+  const ratio = capacity / perMonth;
+
+  if (ratio >= 1) {
+    return {
+      level: "viable",
+      label: "Meta viável",
+      message: "Você tem capacidade suficiente para atingir essa meta.",
+    };
+  } else if (ratio >= 0.6) {
+    const gap = Math.round(perMonth - capacity);
+    return {
+      level: "attention",
+      label: "Ajuste necessário",
+      message: `Faltam aproximadamente R$ ${gap}/mês para atingir essa meta no prazo.`,
+    };
+  } else {
+    return {
+      level: "aggressive",
+      label: "Meta agressiva",
+      message: "Meta agressiva para o prazo atual. Considere estender o prazo ou aumentar a renda.",
+    };
+  }
+}
+
+const viabilityColors: Record<ViabilityLevel, string> = {
+  viable: "bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30",
+  attention: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-500/30",
+  aggressive: "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30",
+};
+
+const viabilityIcons: Record<ViabilityLevel, string> = {
+  viable: "🟢",
+  attention: "🟡",
+  aggressive: "🔴",
+};
+
 const Caixinha = () => {
-  const { savingsGoals, addSavingsGoal, updateSavingsGoal, deleteSavingsGoal } = useFinance();
+  const { savingsGoals, addSavingsGoal, updateSavingsGoal, deleteSavingsGoal, transactions } = useFinance();
   const { coupleMembers, user } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<SavingsGoal | null>(null);
@@ -208,21 +287,32 @@ const Caixinha = () => {
           {savingsGoals.map((goal) => {
             const calc = getGoalCalculations(goal);
             const smartMsgs = getSmartMessages(goal);
+            const capacity = getSavingsCapacity(transactions, goal.responsible, coupleMembers);
+            const viability = calc.pct >= 100
+              ? { level: "viable" as ViabilityLevel, label: "Meta alcançada! 🎉", message: "" }
+              : getViability(capacity, calc.perMonth);
             return (
               <div key={goal.id} className="card-glass p-4 space-y-3 group">
-                {/* Header */}
+                {/* Header with viability badge */}
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{goal.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-1.5">
                       <h3 className="text-sm font-semibold text-foreground truncate">{goal.name}</h3>
-                      <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(goal)}>
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-expense" onClick={() => { deleteSavingsGoal(goal.id); toast.success("Meta removida!"); }}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                      <div className="flex items-center gap-1">
+                        {calc.perMonth !== null && (
+                          <Badge className={`text-[10px] px-1.5 py-0 h-5 font-medium ${viabilityColors[viability.level]}`}>
+                            {viabilityIcons[viability.level]} {viability.label}
+                          </Badge>
+                        )}
+                        <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(goal)}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-expense" onClick={() => { deleteSavingsGoal(goal.id); toast.success("Meta removida!"); }}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -253,6 +343,14 @@ const Caixinha = () => {
                   <span>Responsável: <span className="font-medium text-foreground">{getResponsibleLabel(goal.responsible)}</span></span>
                 </div>
 
+                {/* Savings capacity */}
+                {capacity !== null && calc.pct < 100 && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Wallet className="h-3 w-3" />
+                    <span>Capacidade estimada: <span className="font-medium text-foreground">{formatCurrency(Math.max(capacity, 0))}/mês</span></span>
+                  </div>
+                )}
+
                 {/* Secondary info */}
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -278,6 +376,23 @@ const Caixinha = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Viability message */}
+                {viability.message && calc.pct < 100 && (
+                  <div className={`text-xs px-2.5 py-1.5 rounded-md ${viabilityColors[viability.level]}`}>
+                    {viability.message}
+                  </div>
+                )}
+
+                {/* Per-person suggestion for "both" */}
+                {goal.responsible === "both" && calc.perMonth !== null && calc.perMonth > 0 && calc.pct < 100 && (
+                  <div className="text-xs text-muted-foreground px-2.5 py-1.5 rounded-md bg-secondary/50">
+                    👥 Cada pessoa precisaria guardar cerca de <span className="font-medium text-foreground">R$ {Math.round(calc.perMonth / 2)}/mês</span>
+                    {capacity !== null && capacity > 0 && (
+                      <> — capacidade individual estimada: <span className="font-medium text-foreground">R$ {Math.round(capacity / 2)}/mês</span></>
+                    )}
+                  </div>
+                )}
 
                 {/* Smart messages */}
                 <div className="space-y-1 border-t border-border/50 pt-2">
