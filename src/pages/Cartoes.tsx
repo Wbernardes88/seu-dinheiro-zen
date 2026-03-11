@@ -293,6 +293,7 @@ const Cartoes = () => {
 
           {(() => {
             const invoiceTx = getCardInvoice(activeCard);
+            const allCardTx = transactions.filter((t) => t.creditCardId === activeCard.id);
             const total = invoiceTx.reduce((sum, t) => sum + (t.type === "expense" ? t.amount : -t.amount), 0);
 
             return (
@@ -306,29 +307,55 @@ const Cartoes = () => {
                   <p className="text-sm text-muted-foreground text-center py-6">Nenhum lançamento nesta fatura</p>
                 ) : (
                   <>
-                    {invoiceTx.length > 1 && (
-                      <div className="flex justify-end">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5"
-                          disabled={deletingIds.size > 0}
-                          onClick={async () => {
-                            if (!confirm(`Excluir todos os ${invoiceTx.length} lançamentos desta fatura?`)) return;
-                            setDeletingIds(new Set(invoiceTx.map(t => t.id)));
-                            let count = 0;
-                            for (const t of invoiceTx) {
-                              const ok = await deleteTransaction(t.id);
-                              if (ok) count++;
-                            }
-                            setDeletingIds(new Set());
-                            play("delete");
-                            toast.success(`${count} lançamentos excluídos!`);
-                          }}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                          Excluir todos ({invoiceTx.length})
-                        </Button>
+                    {(invoiceTx.length > 1 || allCardTx.length > 0) && (
+                      <div className="flex justify-end gap-2 flex-wrap">
+                        {invoiceTx.length > 1 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5"
+                            disabled={deletingIds.size > 0}
+                            onClick={async () => {
+                              if (!confirm(`Excluir todos os ${invoiceTx.length} lançamentos desta fatura?`)) return;
+                              setDeletingIds(new Set(invoiceTx.map(t => t.id)));
+                              let count = 0;
+                              for (const t of invoiceTx) {
+                                const ok = await deleteTransaction(t.id);
+                                if (ok) count++;
+                              }
+                              setDeletingIds(new Set());
+                              play("delete");
+                              toast.success(`${count} lançamentos excluídos!`);
+                            }}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Excluir fatura ({invoiceTx.length})
+                          </Button>
+                        )}
+
+                        {allCardTx.length > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5"
+                            disabled={deletingIds.size > 0}
+                            onClick={async () => {
+                              if (!confirm(`Excluir TODOS os ${allCardTx.length} lançamentos deste cartão em todos os meses?`)) return;
+                              setDeletingIds(new Set(allCardTx.map((t) => t.id)));
+                              let count = 0;
+                              for (const t of allCardTx) {
+                                const ok = await deleteTransaction(t.id);
+                                if (ok) count++;
+                              }
+                              setDeletingIds(new Set());
+                              play("delete");
+                              toast.success(`${count} lançamentos do cartão excluídos!`);
+                            }}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Limpar todos os meses ({allCardTx.length})
+                          </Button>
+                        )}
                       </div>
                     )}
                     <div className="space-y-1">
