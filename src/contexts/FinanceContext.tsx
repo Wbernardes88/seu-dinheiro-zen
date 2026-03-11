@@ -124,6 +124,15 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         })));
       }
 
+      const mapCard = (c: any): CreditCard => ({
+        id: c.id, name: c.name, brand: c.brand, color: c.color,
+        creditLimit: Number(c.credit_limit), closingDay: c.closing_day, dueDay: c.due_day,
+      });
+
+      if (ccRes.data) {
+        setCreditCards(ccRes.data.map(mapCard));
+      }
+
       setLoading(false);
     };
 
