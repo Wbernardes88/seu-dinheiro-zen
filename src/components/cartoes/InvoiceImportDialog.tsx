@@ -176,9 +176,27 @@ const InvoiceImportDialog = ({ open, onOpenChange, card }: Props) => {
           const remaining = t.total_installments - t.installment_number;
           for (let i = 1; i <= remaining; i++) {
             const futureInstallment = t.installment_number + i;
-            // Calculate future month date
-            const futureDate = new Date(invoiceMeta.invoice_year, invoiceMeta.invoice_month - 1 + i, card.closingDay);
-            const futureDateStr = `${futureDate.getFullYear()}-${String(futureDate.getMonth() + 1).padStart(2, '0')}-${String(futureDate.getDate()).padStart(2, '0')}`;
+            // Use day=1 to avoid month overflow
+            const futureMonth0 = invoiceMeta.invoice_month - 1 + i; // 0-based
+            const futureDate = new Date(invoiceMeta.invoice_year, futureMonth0, 1);
+            const futureDateStr = `${futureDate.getFullYear()}-${String(futureDate.getMonth() + 1).padStart(2, '0')}-01`;
+
+            // Check for existing duplicate (same card, same description, same installment, same month)
+            const { data: existing } = await supabase
+              .from("transactions")
+              .select("id")
+              .eq("couple_id", coupleId)
+              .eq("credit_card_id", card.id)
+              .eq("description", t.description)
+              .eq("installment_number", futureInstallment)
+              .eq("total_installments", t.total_installments)
+              .eq("date", futureDateStr)
+              .limit(1);
+
+            if (existing && existing.length > 0) {
+              console.log(`Skipping duplicate installment ${futureInstallment}/${t.total_installments} for "${t.description}"`);
+              continue;
+            }
 
             const { error: futureError } = await supabase.from("transactions").insert({
               couple_id: coupleId,
