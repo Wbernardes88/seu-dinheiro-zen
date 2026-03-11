@@ -169,6 +169,41 @@ const Lancamentos = () => {
           </div>
         </div>
 
+        {/* Credit card & installments (conditional) */}
+        {paymentMethod === "Cartão crédito" && creditCards.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Cartão</Label>
+              <Select value={selectedCardId} onValueChange={setSelectedCardId}>
+                <SelectTrigger><SelectValue placeholder="Selecione o cartão" /></SelectTrigger>
+                <SelectContent>
+                  {creditCards.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      <div className="flex items-center gap-2">
+                        <div className="h-3 w-3 rounded-full" style={{ background: c.color }} />
+                        {c.name} ({c.brand})
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Parcelas</Label>
+              <Select value={installments} onValueChange={setInstallments}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
+                    <SelectItem key={n} value={n.toString()}>
+                      {n}x {amount ? `de ${formatCurrency(parseFloat(amount) / n)}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-1.5">
           <Label className="text-xs">Valor (R$)</Label>
           <Input type="number" step="0.01" min="0" placeholder="0,00" value={amount} onChange={(e) => setAmount(e.target.value)} />
