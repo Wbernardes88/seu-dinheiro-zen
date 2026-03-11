@@ -255,9 +255,11 @@ const Caixinha = () => {
     if (editing) {
       updateSavingsGoal(editing.id, data);
       toast.success("Meta atualizada!");
+      play("success");
     } else {
       addSavingsGoal(data);
       toast.success("Meta criada!");
+      play("kaching");
     }
     setDialogOpen(false);
   };
