@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
+import { useSounds } from "@/contexts/SoundContext";
 import { formatCurrency } from "@/lib/data";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { toast } from "sonner";
 
 const LimiteGastos = () => {
   const { budgetLimits, setBudgetLimit, deleteBudgetLimit, categories } = useFinance();
+  const { play } = useSounds();
   const expCats = categories.filter((c) => c.type === "expense");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCatId, setEditingCatId] = useState("");
@@ -40,6 +42,7 @@ const LimiteGastos = () => {
     const cat = expCats.find((c) => c.id === editingCatId);
     setBudgetLimit(editingCatId, cat?.name || editingCatName, parseFloat(budgetValue));
     toast.success("Limite salvo!");
+    play("success");
     setDialogOpen(false);
   };
 
@@ -100,7 +103,7 @@ const LimiteGastos = () => {
                     <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100" onClick={() => openEdit(item)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 text-expense" onClick={() => { deleteBudgetLimit(item.categoryId); toast.success("Limite removido!"); }}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 text-expense" onClick={() => { deleteBudgetLimit(item.categoryId); play("delete"); toast.success("Limite removido!"); }}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>

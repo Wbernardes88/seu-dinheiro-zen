@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
+import { useSounds } from "@/contexts/SoundContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,7 @@ import type { Category } from "@/lib/data";
 
 const Categorias = () => {
   const { categories, addCategory, updateCategory, deleteCategory } = useFinance();
+  const { play } = useSounds();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [name, setName] = useState("");
@@ -44,9 +46,11 @@ const Categorias = () => {
     if (editing) {
       updateCategory(editing.id, { name, type, icon: icon || "📁" });
       toast.success("Categoria atualizada!");
+      play("success");
     } else {
       addCategory({ name, type, icon: icon || "📁" });
       toast.success("Categoria criada!");
+      play("kaching");
     }
     setDialogOpen(false);
   };
@@ -54,6 +58,7 @@ const Categorias = () => {
   const handleDelete = (id: string) => {
     deleteCategory(id);
     toast.success("Categoria removida!");
+    play("delete");
   };
 
   const emojiOptions = ["💰", "💻", "📈", "📦", "🍔", "🚗", "🏠", "💊", "📚", "🎮", "👕", "📱", "🎬", "🐾", "💇", "🎁", "⚽", "✈️", "🔧", "📁"];

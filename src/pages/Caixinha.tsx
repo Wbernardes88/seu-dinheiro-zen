@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSounds } from "@/contexts/SoundContext";
 import { formatCurrency, parseLocalDate } from "@/lib/data";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -185,6 +186,7 @@ const viabilityIcons: Record<ViabilityLevel, string> = {
 const Caixinha = () => {
   const { savingsGoals, addSavingsGoal, updateSavingsGoal, deleteSavingsGoal, transactions } = useFinance();
   const { coupleMembers, user } = useAuth();
+  const { play } = useSounds();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<SavingsGoal | null>(null);
   const [name, setName] = useState("");
@@ -253,9 +255,11 @@ const Caixinha = () => {
     if (editing) {
       updateSavingsGoal(editing.id, data);
       toast.success("Meta atualizada!");
+      play("success");
     } else {
       addSavingsGoal(data);
       toast.success("Meta criada!");
+      play("kaching");
     }
     setDialogOpen(false);
   };
@@ -313,7 +317,7 @@ const Caixinha = () => {
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(goal)}>
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-expense" onClick={() => { deleteSavingsGoal(goal.id); toast.success("Meta removida!"); }}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-expense" onClick={() => { deleteSavingsGoal(goal.id); play("delete"); toast.success("Meta removida!"); }}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>

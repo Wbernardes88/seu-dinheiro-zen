@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSounds } from "@/contexts/SoundContext";
 import { formatCurrency } from "@/lib/data";
 import { CheckCircle2, Circle, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import { toast } from "sonner";
 const Desafio52Semanas = () => {
   const { challenge52Weeks, toggleWeek } = useFinance();
   const { coupleId } = useAuth();
+  const { play } = useSounds();
 
   const defaultGoal = challenge52Weeks.reduce((s, w) => s + w.amount, 0);
   const [customGoal, setCustomGoal] = useState<number | null>(null);
@@ -93,7 +95,7 @@ const Desafio52Semanas = () => {
           {scaledWeeks.map((w) => (
             <button
               key={w.week}
-              onClick={() => toggleWeek(w.week)}
+              onClick={() => { toggleWeek(w.week); play(w.completed ? "tap" : "success"); }}
               className={`flex flex-col items-center p-2 rounded-lg text-xs transition-colors cursor-pointer ${
                 w.completed ? "bg-accent text-accent-foreground" : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
               }`}

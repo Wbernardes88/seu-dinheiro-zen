@@ -1,7 +1,8 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon, LogOut, Users, BookOpen, Menu } from "lucide-react";
+import { LayoutDashboard, Receipt, Tag, Gauge, PiggyBank, Target, Sun, Moon, LogOut, Users, BookOpen, Menu, Volume2, VolumeX } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSounds } from "@/contexts/SoundContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import logo from "@/assets/logo.png";
@@ -19,6 +20,7 @@ const navItems = [
 const AppLayout = () => {
   const { theme, toggleTheme } = useTheme();
   const { user, signOut, nickname, coupleMembers } = useAuth();
+  const { soundEnabled, toggleSound, play } = useSounds();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const displayName = nickname || user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Usuário";
@@ -34,15 +36,26 @@ const AppLayout = () => {
             <img src={logo} alt="FinançasJá" className="h-8 w-8 rounded-lg object-contain" />
             <span className="font-semibold text-lg text-foreground">FinançasJá</span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full"
-            onClick={toggleTheme}
-            title={theme === "light" ? "Modo escuro" : "Modo claro"}
-          >
-            {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={() => { toggleSound(); play("tap"); }}
+              title={soundEnabled ? "Desativar sons" : "Ativar sons"}
+            >
+              {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={toggleTheme}
+              title={theme === "light" ? "Modo escuro" : "Modo claro"}
+            >
+              {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
 
         {isCoupleMode && (
@@ -119,6 +132,14 @@ const AppLayout = () => {
             )}
           </div>
           <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={() => { toggleSound(); play("tap"); }}
+            >
+              {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+            </Button>
             <Button
               variant="ghost"
               size="icon"

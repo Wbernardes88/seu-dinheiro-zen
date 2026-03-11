@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSounds } from "@/contexts/SoundContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +21,7 @@ const getLocalDateStr = () => {
 const Lancamentos = () => {
   const { transactions, addTransaction, deleteTransaction, updateTransaction, categories } = useFinance();
   const { coupleMembers } = useAuth();
+  const { play } = useSounds();
 
   const getNickname = (userId?: string) => {
     if (!userId) return "";
@@ -83,6 +85,7 @@ const Lancamentos = () => {
     setIsRecurring(false);
     setIsFixed(false);
     toast.success(wasRecurring ? "Lançamento recorrente adicionado (12 meses)!" : "Lançamento adicionado!");
+    play(type === "income" ? "kaching" : "swoosh");
     setTimeout(() => setIsSubmitting(false), 500);
   };
 
@@ -259,8 +262,12 @@ const Lancamentos = () => {
                     className="h-7 w-7 opacity-0 group-hover:opacity-100 text-expense"
                     onClick={async () => {
                       const removed = await deleteTransaction(t.id);
-                      if (removed) toast.success("Removido!");
-                      else toast.error("Não foi possível remover o lançamento.");
+                      if (removed) {
+                        play("delete");
+                        toast.success("Removido!");
+                      } else {
+                        toast.error("Não foi possível remover o lançamento.");
+                      }
                     }}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
