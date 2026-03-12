@@ -60,6 +60,22 @@ const CoupleManage = () => {
   }, [coupleId]);
 
   const hasPartner = members.length > 1;
+  const [dissolving, setDissolving] = useState(false);
+
+  const handleDissolveCouple = async () => {
+    if (!coupleId || !user) return;
+    setDissolving(true);
+    const { error } = await supabase.rpc("dissolve_couple" as any, { p_couple_id: coupleId });
+    if (error) {
+      toast.error("Erro ao desvincular: " + error.message);
+      setDissolving(false);
+      return;
+    }
+    toast.success("Casal desvinculado. Criando seu espaço individual...");
+    await refreshCouple();
+    setDissolving(false);
+    window.location.reload();
+  };
 
   const generateInvite = async () => {
     if (!coupleId || !user) return;
