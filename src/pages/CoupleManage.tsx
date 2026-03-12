@@ -256,6 +256,53 @@ const CoupleManage = () => {
           </Card>
         </>
       )}
+      {hasPartner && (
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <Unlink className="h-5 w-5" />
+              Desvincular casal
+            </CardTitle>
+            <CardDescription>
+              Desfaça a conexão com seu parceiro(a). Cada um voltará a ter uma conta individual.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full" disabled={dissolving}>
+                  {dissolving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  Sair do casal
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Tem certeza que deseja desfazer a conexão?</AlertDialogTitle>
+                  <AlertDialogDescription className="space-y-2">
+                    <p>Ao desvincular o casal:</p>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      <li>As contas deixam de compartilhar dados</li>
+                      <li>Cada usuário voltará a ter sua conta individual</li>
+                      <li>O código de convite anterior deixará de funcionar</li>
+                      <li>Os dados financeiros já registrados <strong>não serão apagados</strong></li>
+                    </ul>
+                    <p className="font-medium mt-2">Essa ação não pode ser desfeita.</p>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDissolveCouple}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Sim, desvincular
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
