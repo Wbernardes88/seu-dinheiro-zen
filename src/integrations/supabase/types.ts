@@ -419,6 +419,7 @@ export type Database = {
     }
     Functions: {
       auto_create_couple: { Args: { p_user_id: string }; Returns: string }
+      dissolve_couple: { Args: { p_couple_id: string }; Returns: undefined }
       get_user_couple_id: { Args: never; Returns: string }
       reset_challenge_weeks: {
         Args: { p_couple_id: string }
