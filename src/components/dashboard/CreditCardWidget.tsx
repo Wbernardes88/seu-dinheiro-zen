@@ -1,24 +1,28 @@
 import { useMemo } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
-import { formatCurrency, parseLocalDate, getCurrentInvoicePeriod } from "@/lib/data";
+import { formatCurrency, parseLocalDate } from "@/lib/data";
 import { CreditCard, Calendar, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const CreditCardWidget = () => {
+interface CreditCardWidgetProps {
+  month?: number;
+  year?: number;
+}
+
+const CreditCardWidget = ({ month, year }: CreditCardWidgetProps = {}) => {
   const { creditCards, transactions } = useFinance();
   const navigate = useNavigate();
   const now = new Date();
+  const displayMonth = month ?? now.getMonth();
+  const displayYear = year ?? now.getFullYear();
 
   const cardData = useMemo(() => {
     return creditCards.map((card) => {
-      // Use billing cycle to determine which month's invoice is "current"
-      const { month: invoiceMonth, year: invoiceYear } = getCurrentInvoicePeriod(card.closingDay, now);
-
       const spent = transactions
         .filter((t) => {
           if (t.creditCardId !== card.id || t.type !== "expense") return false;
           const d = parseLocalDate(t.date);
-          return d.getMonth() === invoiceMonth && d.getFullYear() === invoiceYear;
+          return d.getMonth() === displayMonth && d.getFullYear() === displayYear;
         })
         .reduce((sum, t) => sum + t.amount, 0);
 
@@ -27,7 +31,7 @@ const CreditCardWidget = () => {
 
       return { ...card, spent, usagePct, available };
     });
-  }, [creditCards, transactions, now.getMonth(), now.getFullYear(), now.getDate()]);
+  }, [creditCards, transactions, displayMonth, displayYear]);
 
   if (creditCards.length === 0) return null;
 
