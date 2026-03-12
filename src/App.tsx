@@ -10,6 +10,7 @@ import { ThemeProvider } from "./components/ThemeProvider";
 import { SoundProvider } from "./contexts/SoundContext";
 import AppLayout from "./components/AppLayout";
 import { Loader2 } from "lucide-react";
+import { PWAUpdatePrompt } from "./components/PWAUpdatePrompt";
 
 // Lazy-loaded pages
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -57,6 +58,7 @@ const App = () => (
           <AuthProvider>
             <Toaster />
             <Sonner />
+            <PWAUpdatePrompt />
           <BrowserRouter>
             <Suspense fallback={<PageLoader />}>
               <Routes>
