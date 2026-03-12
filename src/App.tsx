@@ -58,6 +58,7 @@ const App = () => (
           <AuthProvider>
             <Toaster />
             <Sonner />
+            <PWAUpdatePrompt />
           <BrowserRouter>
             <Suspense fallback={<PageLoader />}>
               <Routes>
