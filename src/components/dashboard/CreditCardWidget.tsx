@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
-import { formatCurrency, parseLocalDate, getCurrentInvoicePeriod } from "@/lib/data";
+import { formatCurrency, parseLocalDate } from "@/lib/data";
 import { CreditCard, Calendar, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
