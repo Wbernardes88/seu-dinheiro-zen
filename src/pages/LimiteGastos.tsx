@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useFinance } from "@/contexts/FinanceContext";
 import { useSounds } from "@/contexts/SoundContext";
 import { formatCurrency } from "@/lib/data";
@@ -11,9 +11,49 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+const getAlertTier = (pct: number) => {
+  if (pct >= 100) return "critical";
+  if (pct >= 90) return "high";
+  if (pct >= 79) return "warning";
+  return "normal";
+};
+
+const alertColors = {
+  normal: { text: "text-income", badge: "bg-income/10 text-income", border: "", progress: "" },
+  warning: { text: "text-yellow-600 dark:text-yellow-500", badge: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-500", border: "border-yellow-500/40", progress: "[&>div]:bg-yellow-500" },
+  high: { text: "text-orange-600 dark:text-orange-500", badge: "bg-orange-500/10 text-orange-600 dark:text-orange-500", border: "border-orange-500/40", progress: "[&>div]:bg-orange-500" },
+  critical: { text: "text-expense", badge: "bg-expense/10 text-expense", border: "border-expense/40", progress: "[&>div]:bg-expense" },
+};
+
 const LimiteGastos = () => {
   const { budgetLimits, setBudgetLimit, deleteBudgetLimit, categories } = useFinance();
   const { play } = useSounds();
+  const toastShownRef = useRef<Set<string>>(new Set());
+
+  // Automatic toasts when limits reach alert thresholds
+  useEffect(() => {
+    budgetLimits.forEach((bl) => {
+      if (bl.budget <= 0) return;
+      const pct = (bl.spent / bl.budget) * 100;
+      const tier = getAlertTier(pct);
+      if (tier === "normal") return;
+
+      const key = `${bl.categoryId}-${tier}`;
+      if (toastShownRef.current.has(key)) return;
+      toastShownRef.current.add(key);
+
+      const messages: Record<string, string> = {
+        warning: `⚠️ Atenção: ${bl.category} já utilizou ${Math.round(pct)}% do limite definido.`,
+        high: `🔶 Cuidado: ${bl.category} está em ${Math.round(pct)}% — muito próximo de atingir o limite.`,
+        critical: `🚨 ${bl.category}: limite atingido ou ultrapassado (${Math.round(pct)}%). Revise seus gastos.`,
+      };
+
+      toast(messages[tier], {
+        duration: tier === "critical" ? 10000 : 7000,
+        closeButton: true,
+      });
+    });
+  }, [budgetLimits]);
   const expCats = categories.filter((c) => c.type === "expense");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCatId, setEditingCatId] = useState("");
