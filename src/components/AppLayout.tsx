@@ -118,6 +118,7 @@ const AppLayout = () => {
             <LogOut className="h-4 w-4 mr-2" />
             Sair
           </Button>
+          <p className="text-[10px] text-muted-foreground/50 text-center pt-2">v1.4.0</p>
         </div>
       </aside>
 
