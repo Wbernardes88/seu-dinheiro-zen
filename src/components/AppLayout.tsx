@@ -192,6 +192,7 @@ const AppLayout = () => {
                     Sair
                   </Button>
                 </div>
+                <p className="text-[10px] text-muted-foreground/50 text-center pt-3">v1.4.0</p>
               </SheetContent>
             </Sheet>
           </div>
