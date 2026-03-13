@@ -134,7 +134,7 @@ const LimiteGastos = () => {
                     </Button>
                   </div>
                 </div>
-                <Progress value={clampedPct} className={`h-2 ${rawPct >= 100 ? "[&>div]:bg-expense" : rawPct >= 80 ? "[&>div]:bg-yellow-500" : ""}`} />
+                <Progress value={clampedPct} className={`h-2 ${colors.progress}`} />
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Gasto: {formatCurrency(item.spent)}</span>
                   <span>Limite: {formatCurrency(item.budget)}</span>
